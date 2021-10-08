@@ -1,6 +1,6 @@
 # OSU LoRa Station
 
-Testing project for LoRa based stations.
+Testing project for LoRa based stations. Arduino IDE board - TTGO T1.
 
 ## Getting started
 
