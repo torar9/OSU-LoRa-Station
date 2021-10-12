@@ -89,6 +89,7 @@ enum class ActivationMode {OTAA, ABP};
     const char deviceId[] = DEVICEID;
 #else
     const char deviceId[] = DEVICEID_DEFAULT;
+    
 #endif
 
 // Allow WAITFOR_SERIAL_SECONDS to be defined in platformio.ini.

@@ -803,6 +803,7 @@ void processDownlink(ostime_t txCompleteTimestamp, uint8_t fPort, uint8_t* data,
 
 void setup() 
 {
+    delay(2000);
     // boardInit(InitType::Hardware) must be called at start of setup() before anything else.
     bool hardwareInitSucceeded = boardInit(InitType::Hardware);
 
