@@ -53,7 +53,7 @@
 
 // Optional: If ABP_DEVICEID is defined it will be used for ABP instead of the default defined in the BSF.
 // #define ABP_DEVICEID "<deviceid>"
-#define ABP_DEVICEID "<deviceid>"
+#define ABP_DEVICEID "ttgo_tbeam"
 
 // Keys required for ABP activation:
 
