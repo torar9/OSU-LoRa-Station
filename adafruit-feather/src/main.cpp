@@ -23,13 +23,13 @@ static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x3
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
 static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
 
-static uint8_t payload[25];
+static uint8_t payload[PAYLOAD_BUFFER_SIZE];
 static osjob_t sendjob;
 HTU21D htu;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const unsigned TX_INTERVAL = 60;
+const unsigned TX_INTERVAL = TX_TIMER_SECONDS;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
@@ -38,6 +38,85 @@ const lmic_pinmap lmic_pins = {
     .rst = 4,
     .dio = {7, 6, LMIC_UNUSED_PIN},
 };
+
+void do_send(osjob_t *j);
+void onEvent(ev_t ev);
+
+void setup()
+{
+#if DEBUG == 1
+    while (!Serial)
+        ; // wait for Serial to be initialized
+    DBG_SERIAL_BEGIN(SERIAL_SPEED);
+    delay(3000); // per sample code on RF_95 test
+#endif
+
+    sensirion_i2c_init();
+    if (sps30_probe() != 0)
+    {
+        DBG_PRINTLN(F("Failed to initialize sps30"));
+    }
+    /*
+    //By default cleaning interval is set to 168 hours = 1 week
+    //If sensor is switched off then counter is reset to 0
+    else
+    {
+        sps30_set_fan_auto_cleaning_interval_days(SPS30_CLEAN_INTERVAL_IN_DAYS);
+    }*/
+    
+    htu.begin();
+
+    // LMIC init
+    os_init();
+    // Reset the MAC state. Session and pending data transfers will be discarded.
+    LMIC_reset();
+
+// Set static session parameters. Instead of dynamically establishing a session
+// by joining the network, precomputed session parameters are be provided.
+#ifdef PROGMEM
+    // On AVR, these values are stored in flash and only copied to RAM
+    // once. Copy them to a temporary buffer here, LMIC_setSession will
+    // copy them into a buffer of its own again.
+    uint8_t appskey[sizeof(APPSKEY)];
+    uint8_t nwkskey[sizeof(NWKSKEY)];
+    memcpy_P(appskey, APPSKEY, sizeof(APPSKEY));
+    memcpy_P(nwkskey, NWKSKEY, sizeof(NWKSKEY));
+    LMIC_setSession(0x13, DEVADDR, nwkskey, appskey);
+#else
+    // If not running an AVR with PROGMEM, just use the arrays directly
+    LMIC_setSession(0x13, DEVADDR, NWKSKEY, APPSKEY);
+#endif
+
+    LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI); // g-band
+    LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
+    LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK, DR_FSK), BAND_MILLI);   // g2-band
+
+    // Disable link check validation
+    LMIC_setLinkCheckMode(0);
+
+    // TTN uses SF9 for its RX2 window.
+    LMIC.dn2Dr = DR_SF9;
+
+    // Set data rate and transmit power for uplink
+    LMIC_setDrTxpow(DR_SF7, 14); // default
+    // LMIC_setDrTxpow(DR_SF9, 14); // email
+    LMIC_setAdrMode(0); // email
+
+    //LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100); // email -> Should not be needed since LMIC version v3.1.0
+    // Start job
+    do_send(&sendjob);
+}
+
+void loop()
+{
+    os_runloop_once();
+}
 
 void do_send(osjob_t *j)
 {
@@ -66,7 +145,7 @@ void do_send(osjob_t *j)
             ret = sps30_read_data_ready(&data_ready);
             if (ret < 0)
             {
-                DBG_PRINT(F("error reading data-ready flag: "));
+                DBG_PRINT(F("SPS30 measure error"));
                 DBG_PRINTLN(ret);
             }
             else if (data_ready)
@@ -99,6 +178,7 @@ void do_send(osjob_t *j)
 
         DBG_PRINT("Typical partical size: ");
         DBG_PRINTLN(m.typical_particle_size);
+
 
         //Temperature and humidity
         uint16_t payloadTemp = LMIC_f2sflt16(temp / 100);
@@ -189,7 +269,7 @@ void onEvent(ev_t ev)
     switch (ev)
     {
     case EV_SCAN_TIMEOUT:
-        //DBG_PRINTLN(F("EV_SCAN_TIMEOUT"));
+        DBG_PRINTLN(F("EV_SCAN_TIMEOUT"));
         break;
     case EV_BEACON_FOUND:
         //DBG_PRINTLN(F("EV_BEACON_FOUND"));
@@ -201,10 +281,10 @@ void onEvent(ev_t ev)
         //DBG_PRINTLN(F("EV_BEACON_TRACKED"));
         break;
     case EV_JOINING:
-        //DBG_PRINTLN(F("EV_JOINING"));
+        DBG_PRINTLN(F("EV_JOINING"));
         break;
     case EV_JOINED:
-        //DBG_PRINTLN(F("EV_JOINED"));
+        DBG_PRINTLN(F("EV_JOINED"));
         break;
     /*
     || This event is defined but not used in the code. No
@@ -234,20 +314,20 @@ void onEvent(ev_t ev)
         os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
         break;
     case EV_LOST_TSYNC:
-        //DBG_PRINTLN(F("EV_LOST_TSYNC"));
+        DBG_PRINTLN(F("EV_LOST_TSYNC"));
         break;
     case EV_RESET:
-        //DBG_PRINTLN(F("EV_RESET"));
+        DBG_PRINTLN(F("EV_RESET"));
         break;
     case EV_RXCOMPLETE:
         // data received in ping slot
-        //DBG_PRINTLN(F("EV_RXCOMPLETE"));
+        DBG_PRINTLN(F("EV_RXCOMPLETE"));
         break;
     case EV_LINK_DEAD:
-        //DBG_PRINTLN(F("EV_LINK_DEAD"));
+        DBG_PRINTLN(F("EV_LINK_DEAD"));
         break;
     case EV_LINK_ALIVE:
-        //DBG_PRINTLN(F("EV_LINK_ALIVE"));
+        DBG_PRINTLN(F("EV_LINK_ALIVE"));
         break;
     /*
     || This event is defined but not used in the code. No
@@ -258,93 +338,20 @@ void onEvent(ev_t ev)
     ||    break;
     */
     case EV_TXSTART:
-        //DBG_PRINTLN(F("EV_TXSTART"));
+        DBG_PRINTLN(F("EV_TXSTART"));
         break;
     case EV_TXCANCELED:
-        //DBG_PRINTLN(F("EV_TXCANCELED"));
+        DBG_PRINTLN(F("EV_TXCANCELED"));
         break;
     case EV_RXSTART:
         /* do not print anything -- it wrecks timing */
         break;
     case EV_JOIN_TXCOMPLETE:
-        DBG_PRINTLN(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
+        //DBG_PRINTLN(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
         break;
     default:
-        //DBG_PRINT(F("Unknown event: "));
+        DBG_PRINT(F("Unknown event: "));
         DBG_PRINTLN((unsigned)ev);
         break;
     }
-}
-
-void setup()
-{
-#if DEBUG == 1
-    while (!Serial)
-        ; // wait for Serial to be initialized
-    DBG_SERIAL_BEGIN(9600);
-    delay(3000); // per sample code on RF_95 test
-#endif
-
-    htu.begin();
-
-    sensirion_i2c_init();
-    if (sps30_probe() != 0)
-    {
-        DBG_PRINTLN(F("Failed to initialize sps30"));
-    }
-    else
-    {
-        sps30_set_fan_auto_cleaning_interval_days(SPS30_CLEAN_INTERVAL);
-    }
-
-    // LMIC init
-    os_init();
-    // Reset the MAC state. Session and pending data transfers will be discarded.
-    LMIC_reset();
-
-// Set static session parameters. Instead of dynamically establishing a session
-// by joining the network, precomputed session parameters are be provided.
-#ifdef PROGMEM
-    // On AVR, these values are stored in flash and only copied to RAM
-    // once. Copy them to a temporary buffer here, LMIC_setSession will
-    // copy them into a buffer of its own again.
-    uint8_t appskey[sizeof(APPSKEY)];
-    uint8_t nwkskey[sizeof(NWKSKEY)];
-    memcpy_P(appskey, APPSKEY, sizeof(APPSKEY));
-    memcpy_P(nwkskey, NWKSKEY, sizeof(NWKSKEY));
-    LMIC_setSession(0x13, DEVADDR, nwkskey, appskey);
-#else
-    // If not running an AVR with PROGMEM, just use the arrays directly
-    LMIC_setSession(0x13, DEVADDR, NWKSKEY, APPSKEY);
-#endif
-
-    LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI); // g-band
-    LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7), BAND_CENTI);  // g-band
-    LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK, DR_FSK), BAND_MILLI);   // g2-band
-
-    // Disable link check validation
-    LMIC_setLinkCheckMode(0);
-
-    // TTN uses SF9 for its RX2 window.
-    LMIC.dn2Dr = DR_SF9;
-
-    // Set data rate and transmit power for uplink
-    LMIC_setDrTxpow(DR_SF7, 14); // default
-    // LMIC_setDrTxpow(DR_SF9, 14); // email
-    LMIC_setAdrMode(0); // email
-
-    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100); // email
-    // Start job
-    do_send(&sendjob);
-}
-
-void loop()
-{
-    os_runloop_once();
 }
