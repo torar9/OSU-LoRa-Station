@@ -70,7 +70,7 @@ function Decoder(bytes, port) {
   decoded.nc05 = sflt162f(nc05) * 100;
 
   nc10 = bytes[14] + bytes[15] * 256;
-  decoded.nc05 = sflt162f(nc10) * 100;
+  decoded.nc10 = sflt162f(nc10) * 100;
 
   nc25 = bytes[16] + bytes[17] * 256;
   decoded.nc25 = sflt162f(nc25) * 100;
