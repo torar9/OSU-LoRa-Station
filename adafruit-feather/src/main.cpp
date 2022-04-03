@@ -23,7 +23,7 @@ static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x3
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
 static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
 
-static uint8_t payload[14];
+static uint8_t payload[25];
 static osjob_t sendjob;
 HTU21D htu;
 
@@ -86,6 +86,21 @@ void do_send(osjob_t *j)
         DBG_PRINT(F("PM 10.0: "));
         DBG_PRINTLN(m.mc_10p0);
 
+        DBG_PRINT(F("NC  0.5: "));
+        DBG_PRINTLN(m.nc_0p5);
+        DBG_PRINT(F("NC  1.0: "));
+        DBG_PRINTLN(m.nc_1p0);
+        DBG_PRINT(F("NC  2.5: "));
+        DBG_PRINTLN(m.nc_2p5);
+        DBG_PRINT(F("NC  4.0: "));
+        DBG_PRINTLN(m.nc_4p0);
+        DBG_PRINT(F("NC 10.0: "));
+        DBG_PRINTLN(m.nc_10p0);
+
+        DBG_PRINT("Typical partical size: ");
+        DBG_PRINTLN(m.typical_particle_size);
+
+        //Temperature and humidity
         uint16_t payloadTemp = LMIC_f2sflt16(temp / 100);
         DBG_PRINTLN(payloadTemp);
         byte tempLow = lowByte(payloadTemp);
@@ -99,8 +114,8 @@ void do_send(osjob_t *j)
         payload[2] = humidLow;
         payload[3] = humidHigh;
 
-        
-        uint16_t payloadPM1 = LMIC_f2sflt16(m.mc_1p0  / 100);
+        //Particle mass concontration
+        uint16_t payloadPM1 = LMIC_f2sflt16(m.mc_1p0 / 100);
         byte PM1Low = lowByte(payloadPM1);
         byte PM1High = highByte(payloadPM1);
         payload[4] = PM1Low;
@@ -124,6 +139,43 @@ void do_send(osjob_t *j)
         payload[10] = PM10Low;
         payload[11] = PM10High;
 
+        //Particle number concontration
+        uint16_t payloadNC05 = LMIC_f2sflt16(m.nc_0p5 / 100);
+        byte NC05Low = lowByte(payloadNC05);
+        byte NC05High = highByte(payloadNC05);
+        payload[12] = NC05Low;
+        payload[13] = NC05High;
+
+        uint16_t payloadNC10 = LMIC_f2sflt16(m.nc_1p0 / 100);
+        byte NC10Low = lowByte(payloadNC10);
+        byte NC10High = highByte(payloadNC10);
+        payload[14] = NC10Low;
+        payload[15] = NC10High;
+
+        uint16_t payloadNC25 = LMIC_f2sflt16(m.nc_2p5 / 100);
+        byte NC25Low = lowByte(payloadNC25);
+        byte NC25High = highByte(payloadNC25);
+        payload[16] = NC25Low;
+        payload[17] = NC25High;
+
+        uint16_t payloadNC40 = LMIC_f2sflt16(m.nc_4p0 / 100);
+        byte NC40Low = lowByte(payloadNC40);
+        byte NC40High = highByte(payloadNC40);
+        payload[18] = NC40Low;
+        payload[19] = NC40High;
+
+        uint16_t payloadNC10p0 = LMIC_f2sflt16(m.nc_10p0 / 100);
+        byte NC10p0Low = lowByte(payloadNC10p0);
+        byte NC10p0High = highByte(payloadNC10p0);
+        payload[20] = NC10p0Low;
+        payload[21] = NC10p0High;
+
+        uint16_t payloadTypical = LMIC_f2sflt16(m.typical_particle_size / 100);
+        byte TypicalLow = lowByte(payloadTypical);
+        byte TypicalHigh = highByte(payloadTypical);
+        payload[22] = TypicalLow;
+        payload[23] = TypicalHigh;
+
         // Prepare upstream data transmission at the next possible time.
         DBG_PRINTLN(sizeof(payload));
         LMIC_setTxData2(1, payload, sizeof(payload) - 1, 0);
@@ -137,22 +189,22 @@ void onEvent(ev_t ev)
     switch (ev)
     {
     case EV_SCAN_TIMEOUT:
-        DBG_PRINTLN(F("EV_SCAN_TIMEOUT"));
+        //DBG_PRINTLN(F("EV_SCAN_TIMEOUT"));
         break;
     case EV_BEACON_FOUND:
-        DBG_PRINTLN(F("EV_BEACON_FOUND"));
+        //DBG_PRINTLN(F("EV_BEACON_FOUND"));
         break;
     case EV_BEACON_MISSED:
-        DBG_PRINTLN(F("EV_BEACON_MISSED"));
+        //DBG_PRINTLN(F("EV_BEACON_MISSED"));
         break;
     case EV_BEACON_TRACKED:
-        DBG_PRINTLN(F("EV_BEACON_TRACKED"));
+        //DBG_PRINTLN(F("EV_BEACON_TRACKED"));
         break;
     case EV_JOINING:
-        DBG_PRINTLN(F("EV_JOINING"));
+        //DBG_PRINTLN(F("EV_JOINING"));
         break;
     case EV_JOINED:
-        DBG_PRINTLN(F("EV_JOINED"));
+        //DBG_PRINTLN(F("EV_JOINED"));
         break;
     /*
     || This event is defined but not used in the code. No
@@ -163,10 +215,10 @@ void onEvent(ev_t ev)
     ||     break;
     */
     case EV_JOIN_FAILED:
-        DBG_PRINTLN(F("EV_JOIN_FAILED"));
+        //DBG_PRINTLN(F("EV_JOIN_FAILED"));
         break;
     case EV_REJOIN_FAILED:
-        DBG_PRINTLN(F("EV_REJOIN_FAILED"));
+        //DBG_PRINTLN(F("EV_REJOIN_FAILED"));
         break;
     case EV_TXCOMPLETE:
         DBG_PRINTLN(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
@@ -182,20 +234,20 @@ void onEvent(ev_t ev)
         os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
         break;
     case EV_LOST_TSYNC:
-        DBG_PRINTLN(F("EV_LOST_TSYNC"));
+        //DBG_PRINTLN(F("EV_LOST_TSYNC"));
         break;
     case EV_RESET:
-        DBG_PRINTLN(F("EV_RESET"));
+        //DBG_PRINTLN(F("EV_RESET"));
         break;
     case EV_RXCOMPLETE:
         // data received in ping slot
-        DBG_PRINTLN(F("EV_RXCOMPLETE"));
+        //DBG_PRINTLN(F("EV_RXCOMPLETE"));
         break;
     case EV_LINK_DEAD:
-        DBG_PRINTLN(F("EV_LINK_DEAD"));
+        //DBG_PRINTLN(F("EV_LINK_DEAD"));
         break;
     case EV_LINK_ALIVE:
-        DBG_PRINTLN(F("EV_LINK_ALIVE"));
+        //DBG_PRINTLN(F("EV_LINK_ALIVE"));
         break;
     /*
     || This event is defined but not used in the code. No
@@ -206,10 +258,10 @@ void onEvent(ev_t ev)
     ||    break;
     */
     case EV_TXSTART:
-        DBG_PRINTLN(F("EV_TXSTART"));
+        //DBG_PRINTLN(F("EV_TXSTART"));
         break;
     case EV_TXCANCELED:
-        DBG_PRINTLN(F("EV_TXCANCELED"));
+        //DBG_PRINTLN(F("EV_TXCANCELED"));
         break;
     case EV_RXSTART:
         /* do not print anything -- it wrecks timing */
@@ -218,7 +270,7 @@ void onEvent(ev_t ev)
         DBG_PRINTLN(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
         break;
     default:
-        DBG_PRINT(F("Unknown event: "));
+        //DBG_PRINT(F("Unknown event: "));
         DBG_PRINTLN((unsigned)ev);
         break;
     }
@@ -232,6 +284,7 @@ void setup()
     DBG_SERIAL_BEGIN(9600);
     delay(3000); // per sample code on RF_95 test
 #endif
+
     htu.begin();
 
     sensirion_i2c_init();

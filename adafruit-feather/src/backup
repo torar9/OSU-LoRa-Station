@@ -6,6 +6,9 @@
 #include <SparkFunHTU21D.h>
 #include <Adafruit_I2CDevice.h>
 #include <Wire.h>
+#include <Adafruit_SleepyDog.h>
+
+#include "config.hpp"
 
 // LoRaWAN NwkSKey, network session key
 // This should be in big-endian (aka msb).
@@ -20,15 +23,7 @@ static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x3
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
 static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
 
-// These callbacks are only used in over-the-air activation, so they are
-// left empty here (we cannot leave them out completely unless
-// DISABLE_JOIN is set in arduino-lmic/project_config/lmic_project_config.h,
-// otherwise the linker will complain).
-void os_getArtEui(u1_t *buf) {}
-void os_getDevEui(u1_t *buf) {}
-void os_getDevKey(u1_t *buf) {}
-
-static uint8_t mydata[] = "Hello, world!";
+static uint8_t payload[14];
 static osjob_t sendjob;
 HTU21D htu;
 
@@ -37,7 +32,6 @@ HTU21D htu;
 const unsigned TX_INTERVAL = 60;
 
 // Pin mapping
-
 const lmic_pinmap lmic_pins = {
     .nss = 8,
     .rxtx = LMIC_UNUSED_PIN,
@@ -50,183 +44,219 @@ void do_send(osjob_t *j)
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND)
     {
-        Serial.println(F("OP_TXRXPEND, not sending"));
+        DBG_PRINTLN(F("OP_TXRXPEND, not sending"));
     }
     else
     {
         struct sps30_measurement m;
         uint16_t data_ready;
         int16_t ret;
-        
-        float temp = htu.readTemperature();
-        float rel_hum = htu.readHumidity();
-        Serial.print(F("Temp: "));
-        Serial.print(temp);
-        Serial.print(F(" C"));
-        Serial.print("\t\t");
-        Serial.print(F("Humidity: "));
-        Serial.print(rel_hum);
-        Serial.println(F(" %"));
 
-        Serial.println(F("Starting sps30 measurements"));
+        float temp = htu.readTemperature();
+        DBG_PRINT(F("Temp: "));
+        DBG_PRINTLN(temp);
+
+        float hum = htu.readHumidity();
+        DBG_PRINT(F("Humidity: "));
+        DBG_PRINTLN(hum);
+
         sps30_start_measurement();
         do
         {
             ret = sps30_read_data_ready(&data_ready);
             if (ret < 0)
             {
-                Serial.print("error reading data-ready flag: ");
-                Serial.println(ret);
+                DBG_PRINT(F("error reading data-ready flag: "));
+                DBG_PRINTLN(ret);
             }
-            else if (!data_ready)
-                Serial.print("data not ready, no new measurement available\n");
-            else
+            else if (data_ready)
                 break;
             delay(100);
         } while (1);
 
         ret = sps30_read_measurement(&m);
-
-        Serial.print(F("PM  1.0: "));
-        Serial.println(m.mc_1p0);
-        Serial.print(F("PM  2.5: "));
-        Serial.println(m.mc_2p5);
-        Serial.print(F("PM  4.0: "));
-        Serial.println(m.mc_4p0);
-        Serial.print(F("PM 10.0: "));
-        Serial.println(m.mc_10p0);
-
         sps30_stop_measurement();
 
+        Serial.print("PM  1.0: ");
+        Serial.println(m.mc_1p0);
+        Serial.print("PM  2.5: ");
+        Serial.println(m.mc_2p5);
+        Serial.print("PM  4.0: ");
+        Serial.println(m.mc_4p0);
+        Serial.print("PM 10.0: ");
+        Serial.println(m.mc_10p0);
+
+        Serial.print("NC  0.5: ");
+        Serial.println(m.nc_0p5);
+        Serial.print("NC  1.0: ");
+        Serial.println(m.nc_1p0);
+        Serial.print("NC  2.5: ");
+        Serial.println(m.nc_2p5);
+        Serial.print("NC  4.0: ");
+        Serial.println(m.nc_4p0);
+        Serial.print("NC 10.0: ");
+        Serial.println(m.nc_10p0);
+
+        Serial.print("Typical partical size: ");
+        Serial.println(m.typical_particle_size);
+
+        uint16_t payloadTemp = LMIC_f2sflt16(temp / 100);
+        DBG_PRINTLN(payloadTemp);
+        byte tempLow = lowByte(payloadTemp);
+        byte tempHigh = highByte(payloadTemp);
+        payload[0] = tempLow;
+        payload[1] = tempHigh;
+
+        uint16_t payloadHumid = LMIC_f2sflt16(hum / 100);
+        byte humidLow = lowByte(payloadHumid);
+        byte humidHigh = highByte(payloadHumid);
+        payload[2] = humidLow;
+        payload[3] = humidHigh;
+
+        uint16_t payloadPM1 = LMIC_f2sflt16(m.mc_1p0 / 100);
+        byte PM1Low = lowByte(payloadPM1);
+        byte PM1High = highByte(payloadPM1);
+        payload[4] = PM1Low;
+        payload[5] = PM1High;
+
+        uint16_t payloadPM2 = LMIC_f2sflt16(m.mc_2p5 / 100);
+        byte PM2Low = lowByte(payloadPM2);
+        byte PM2High = highByte(payloadPM2);
+        payload[6] = PM2Low;
+        payload[7] = PM2High;
+
+        uint16_t payloadPM4 = LMIC_f2sflt16(m.mc_4p0 / 100);
+        byte PM4Low = lowByte(payloadPM4);
+        byte PM4High = highByte(payloadPM4);
+        payload[8] = PM4Low;
+        payload[9] = PM4High;
+
+        uint16_t payloadPM10 = LMIC_f2sflt16(m.mc_10p0 / 100);
+        byte PM10Low = lowByte(payloadPM10);
+        byte PM10High = highByte(payloadPM10);
+        payload[10] = PM10Low;
+        payload[11] = PM10High;
+
         // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, mydata, sizeof(mydata) - 1, 0);
-        Serial.println(F("Packet queued"));
+        DBG_PRINTLN(sizeof(payload));
+        LMIC_setTxData2(1, payload, sizeof(payload) - 1, 0);
+        DBG_PRINTLN(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
 
 void onEvent(ev_t ev)
 {
-    Serial.print(os_getTime());
-    Serial.print(": ");
     switch (ev)
     {
     case EV_SCAN_TIMEOUT:
-        Serial.println(F("EV_SCAN_TIMEOUT"));
+        DBG_PRINTLN(F("EV_SCAN_TIMEOUT"));
         break;
     case EV_BEACON_FOUND:
-        Serial.println(F("EV_BEACON_FOUND"));
+        DBG_PRINTLN(F("EV_BEACON_FOUND"));
         break;
     case EV_BEACON_MISSED:
-        Serial.println(F("EV_BEACON_MISSED"));
+        DBG_PRINTLN(F("EV_BEACON_MISSED"));
         break;
     case EV_BEACON_TRACKED:
-        Serial.println(F("EV_BEACON_TRACKED"));
+        DBG_PRINTLN(F("EV_BEACON_TRACKED"));
         break;
     case EV_JOINING:
-        Serial.println(F("EV_JOINING"));
+        DBG_PRINTLN(F("EV_JOINING"));
         break;
     case EV_JOINED:
-        Serial.println(F("EV_JOINED"));
+        DBG_PRINTLN(F("EV_JOINED"));
         break;
     /*
     || This event is defined but not used in the code. No
     || point in wasting codespace on it.
     ||
     || case EV_RFU1:
-    ||     Serial.println(F("EV_RFU1"));
+    ||     DBG_PRINTLN(F("EV_RFU1"));
     ||     break;
     */
     case EV_JOIN_FAILED:
-        Serial.println(F("EV_JOIN_FAILED"));
+        DBG_PRINTLN(F("EV_JOIN_FAILED"));
         break;
     case EV_REJOIN_FAILED:
-        Serial.println(F("EV_REJOIN_FAILED"));
+        DBG_PRINTLN(F("EV_REJOIN_FAILED"));
         break;
     case EV_TXCOMPLETE:
-        Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
+        DBG_PRINTLN(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
         if (LMIC.txrxFlags & TXRX_ACK)
-            Serial.println(F("Received ack"));
+            DBG_PRINTLN(F("Received ack"));
         if (LMIC.dataLen)
         {
-            Serial.println(F("Received "));
-            Serial.println(LMIC.dataLen);
-            Serial.println(F(" bytes of payload"));
+            DBG_PRINTLN(F("Received "));
+            DBG_PRINTLN(LMIC.dataLen);
+            DBG_PRINTLN(F(" bytes of payload"));
         }
         // Schedule next transmission
         os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
         break;
     case EV_LOST_TSYNC:
-        Serial.println(F("EV_LOST_TSYNC"));
+        DBG_PRINTLN(F("EV_LOST_TSYNC"));
         break;
     case EV_RESET:
-        Serial.println(F("EV_RESET"));
+        DBG_PRINTLN(F("EV_RESET"));
         break;
     case EV_RXCOMPLETE:
         // data received in ping slot
-        Serial.println(F("EV_RXCOMPLETE"));
+        DBG_PRINTLN(F("EV_RXCOMPLETE"));
         break;
     case EV_LINK_DEAD:
-        Serial.println(F("EV_LINK_DEAD"));
+        DBG_PRINTLN(F("EV_LINK_DEAD"));
         break;
     case EV_LINK_ALIVE:
-        Serial.println(F("EV_LINK_ALIVE"));
+        DBG_PRINTLN(F("EV_LINK_ALIVE"));
         break;
     /*
     || This event is defined but not used in the code. No
     || point in wasting codespace on it.
     ||
     || case EV_SCAN_FOUND:
-    ||    Serial.println(F("EV_SCAN_FOUND"));
+    ||    DBG_PRINTLN(F("EV_SCAN_FOUND"));
     ||    break;
     */
     case EV_TXSTART:
-        Serial.println(F("EV_TXSTART"));
+        DBG_PRINTLN(F("EV_TXSTART"));
         break;
     case EV_TXCANCELED:
-        Serial.println(F("EV_TXCANCELED"));
+        DBG_PRINTLN(F("EV_TXCANCELED"));
         break;
     case EV_RXSTART:
         /* do not print anything -- it wrecks timing */
         break;
     case EV_JOIN_TXCOMPLETE:
-        Serial.println(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
+        DBG_PRINTLN(F("EV_JOIN_TXCOMPLETE: no JoinAccept"));
         break;
     default:
-        Serial.print(F("Unknown event: "));
-        Serial.println((unsigned)ev);
+        DBG_PRINT(F("Unknown event: "));
+        DBG_PRINTLN((unsigned)ev);
         break;
     }
 }
 
 void setup()
 {
-    //    pinMode(13, OUTPUT);
+#if DEBUG == 1
     while (!Serial)
         ; // wait for Serial to be initialized
-    Serial.begin(9600);
+    DBG_SERIAL_BEGIN(9600);
     delay(3000); // per sample code on RF_95 test
+#endif
 
     htu.begin();
 
     sensirion_i2c_init();
     if (sps30_probe() != 0)
     {
-        Serial.println("Failed to initialize sps30");
+        DBG_PRINTLN(F("Failed to initialize sps30"));
     }
     else
     {
-        Serial.println("sps30 initialized");
+        sps30_set_fan_auto_cleaning_interval_days(SPS30_CLEAN_INTERVAL);
     }
-
-    Serial.println(F("Starting"));
-
-#ifdef VCC_ENABLE
-    // For Pinoccio Scout boards
-    pinMode(VCC_ENABLE, OUTPUT);
-    digitalWrite(VCC_ENABLE, HIGH);
-    delay(1000);
-#endif
 
     // LMIC init
     os_init();
