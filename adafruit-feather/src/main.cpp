@@ -4,7 +4,6 @@
 #include <SPI.h>
 #include <sps30.h>
 #include <SparkFunHTU21D.h>
-#include <Adafruit_I2CDevice.h>
 #include <Wire.h>
 #include <Adafruit_SleepyDog.h>
 
