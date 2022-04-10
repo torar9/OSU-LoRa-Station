@@ -51,7 +51,6 @@ void setup()
     DBG_SERIAL_BEGIN(SERIAL_SPEED);
     delay(3000); // per sample code on RF_95 test
 #endif
-    int it = MAX_LEN_PAYLOAD;
     sensirion_i2c_init();
     if (sps30_probe() != 0)
     {
@@ -208,95 +207,6 @@ void do_send(osjob_t *j)
         saveToPayload(temp, payload, 0); // Save data to payload at [0] and [1]
         saveToPayload(hum, payload, 2); // Save data to payload at [2] and [3]
         saveToPayload(m, payload, 4); // Save data to payload at [4] and to [23]
-
-        /*
-        saveToPayload(m.mc_1p0, payload, 4);
-        saveToPayload(m.mc_2p5, payload, 6);
-        saveToPayload(m.mc_4p0, payload, 8);
-        saveToPayload(m.mc_10p0, payload, 10);
-        saveToPayload(m.nc_0p5, payload, 12);
-        saveToPayload(m.nc_1p0, payload, 14);
-        saveToPayload(m.nc_2p5, payload, 16);
-        saveToPayload(m.nc_4p0, payload, 18);
-        saveToPayload(m.nc_10p0, payload, 20);
-        saveToPayload(m.typical_particle_size, payload, 22);*/
-
-        /*
-                // Temperature and humidity
-                uint16_t payloadTemp = LMIC_f2sflt16(temp / 100);
-                DBG_PRINTLN(payloadTemp);
-                byte tempLow = lowByte(payloadTemp);
-                byte tempHigh = highByte(payloadTemp);
-                payload[0] = tempLow;
-                payload[1] = tempHigh;
-
-                uint16_t payloadHumid = LMIC_f2sflt16(hum / 100);
-                byte humidLow = lowByte(payloadHumid);
-                byte humidHigh = highByte(payloadHumid);
-                payload[2] = humidLow;
-                payload[3] = humidHigh;
-
-                // Particle mass concontration
-                uint16_t payloadPM1 = LMIC_f2sflt16(m.mc_1p0 / 100);
-                byte PM1Low = lowByte(payloadPM1);
-                byte PM1High = highByte(payloadPM1);
-                payload[4] = PM1Low;
-                payload[5] = PM1High;
-
-                uint16_t payloadPM2 = LMIC_f2sflt16(m.mc_2p5 / 100);
-                byte PM2Low = lowByte(payloadPM2);
-                byte PM2High = highByte(payloadPM2);
-                payload[6] = PM2Low;
-                payload[7] = PM2High;
-
-                uint16_t payloadPM4 = LMIC_f2sflt16(m.mc_4p0 / 100);
-                byte PM4Low = lowByte(payloadPM4);
-                byte PM4High = highByte(payloadPM4);
-                payload[8] = PM4Low;
-                payload[9] = PM4High;
-
-                uint16_t payloadPM10 = LMIC_f2sflt16(m.mc_10p0 / 100);
-                byte PM10Low = lowByte(payloadPM10);
-                byte PM10High = highByte(payloadPM10);
-                payload[10] = PM10Low;
-                payload[11] = PM10High;
-
-                // Particle number concontration
-                uint16_t payloadNC05 = LMIC_f2sflt16(m.nc_0p5 / 100);
-                byte NC05Low = lowByte(payloadNC05);
-                byte NC05High = highByte(payloadNC05);
-                payload[12] = NC05Low;
-                payload[13] = NC05High;
-
-                uint16_t payloadNC10 = LMIC_f2sflt16(m.nc_1p0 / 100);
-                byte NC10Low = lowByte(payloadNC10);
-                byte NC10High = highByte(payloadNC10);
-                payload[14] = NC10Low;
-                payload[15] = NC10High;
-
-                uint16_t payloadNC25 = LMIC_f2sflt16(m.nc_2p5 / 100);
-                byte NC25Low = lowByte(payloadNC25);
-                byte NC25High = highByte(payloadNC25);
-                payload[16] = NC25Low;
-                payload[17] = NC25High;
-
-                uint16_t payloadNC40 = LMIC_f2sflt16(m.nc_4p0 / 100);
-                byte NC40Low = lowByte(payloadNC40);
-                byte NC40High = highByte(payloadNC40);
-                payload[18] = NC40Low;
-                payload[19] = NC40High;
-
-                uint16_t payloadNC10p0 = LMIC_f2sflt16(m.nc_10p0 / 100);
-                byte NC10p0Low = lowByte(payloadNC10p0);
-                byte NC10p0High = highByte(payloadNC10p0);
-                payload[20] = NC10p0Low;
-                payload[21] = NC10p0High;
-
-                uint16_t payloadTypical = LMIC_f2sflt16(m.typical_particle_size / 100);
-                byte TypicalLow = lowByte(payloadTypical);
-                byte TypicalHigh = highByte(payloadTypical);
-                payload[22] = TypicalLow;
-                payload[23] = TypicalHigh;*/
 
         // Prepare upstream data transmission at the next possible time.
         DBG_PRINTLN(sizeof(payload));
