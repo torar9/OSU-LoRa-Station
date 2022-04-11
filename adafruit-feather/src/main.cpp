@@ -22,6 +22,7 @@ static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x3
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
 static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
 
+// Payload array, contains data to be transmitted over to TTN network.
 static uint8_t payload[PAYLOAD_BUFFER_SIZE];
 static osjob_t sendjob;
 static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
@@ -38,11 +39,43 @@ const lmic_pinmap lmic_pins = {
     .dio = {7, 6, LMIC_UNUSED_PIN},
 };
 
+/**
+ * @brief Converts floating data into f2sflt16 format and saves the result into payload as a 2 bytes at specific position.
+ * 
+ * @param data Data to convert and save.
+ * @param payload Pointer to array of data.
+ * @param position Position at which data is stored. Each data takes 2 bytes in payload array due to conversion.
+ */
 void saveToPayload(float data, uint8_t *payload, int position);
+
+/**
+ * @brief Converts sps30 struct into f2sflt16 format and saves the result into payload as a 2 bytes at specific position.
+ * 
+ * @param data Data to convert and save.
+ * @param payload Pointer to array of data.
+ * @param position Position at which data is stored. Each atribute in data struct takes 2 bytes in payload array due to conversion.
+ */
 void saveToPayload(sps30_measurement &data, uint8_t *payload, int position);
+
+/**
+ * @brief Function handles data collection and transmission.
+ * 
+ * @param j 
+ */
 void do_send(osjob_t *j);
+
+/**
+ * @brief Function handles events.
+ * 
+ * @param ev Event to handle
+ */
 void onEvent(ev_t ev);
 
+
+/**
+ * @brief Setup function contains necessarily things to setup MCU, modules and sensors
+ * 
+ */
 void setup()
 {
 #if DEBUG == 1
@@ -113,6 +146,10 @@ void setup()
     do_send(&sendjob);
 }
 
+/**
+ * @brief Main loop function, keep clear from any heavy tasks. os_runloop_once() needs to be called often otherwise LMIC would not work properly.
+ * 
+ */
 void loop()
 {
     os_runloop_once();
