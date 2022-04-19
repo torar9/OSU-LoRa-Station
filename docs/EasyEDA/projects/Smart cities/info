@@ -1,0 +1,159 @@
+{
+  "uuid": "6590193217b471f2af218961ac24eae5",
+  "path": "Offline/Smart%20cities",
+  "name": "Smart cities",
+  "content": "Adaptér pro Adafruit feather 32u4.",
+  "created_at": "2022-02-08 23:36:33",
+  "updated_at": "2022-03-12 19:29:35",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "fdc0981106764c9380e60248ee251f64",
+      "title": "Adapter LoRa",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "6eb2ddf9dc854f518a3e498f59938035": 1,
+        "7ff5b657d9f65ca285001e2b488e2e99": 2,
+        "dae7f97ebfa34b9a8267d29ce0d9d6dd": 2,
+        "3daf3ba31c4b4822aca78833d26e95eb": 2,
+        "99c36b382e4749d78bc050831d1725fe": 2
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "100uF",
+          2,
+          "CAP-D3.0XF1.5",
+          "C1,C2",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "912a75eb908e48e1ac6280fbf7d4259c",
+            "uuid": "3daf3ba31c4b4822aca78833d26e95eb"
+          }
+        ],
+        [
+          "0.1uF",
+          2,
+          "RAD-0.1",
+          "C3,C4",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "d8f3b09873bf4bf89243089a133a0e9f",
+            "uuid": "99c36b382e4749d78bc050831d1725fe"
+          }
+        ],
+        [
+          "I2C",
+          2,
+          "HDR-4X1/2.54",
+          "HTU21D,SPS30",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "ReliaPro",
+            "BOM_Manufacturer Part": "Header-Female-2.54_1x4",
+            "BOM_Supplier Part": "C124413",
+            "puuid": "b73ecc946600486997b70f149e556e90",
+            "uuid": "7ff5b657d9f65ca285001e2b488e2e99"
+          }
+        ],
+        [
+          "Adafruit Feather 32u4 Radio with RFM69HCW Module",
+          1,
+          "ADAFRUIT-FEATHER-32U4-RFM-LORA",
+          "MCU",
+          {
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "20371d26fef24c4a8c8e1b15769fc66d",
+            "uuid": "6eb2ddf9dc854f518a3e498f59938035"
+          }
+        ],
+        [
+          "10K",
+          2,
+          "AXIAL-0.3",
+          "R1,R2",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "b9efc06d0fb742f99a478d48de211eb9",
+            "uuid": "dae7f97ebfa34b9a8267d29ce0d9d6dd"
+          }
+        ]
+      ],
+      "updateTime": 1647018233,
+      "createTime": 1644359794,
+      "histories": [],
+      "created_at": "2022-02-08 23:36:34",
+      "updated_at": "2022-03-11 18:03:53"
+    },
+    {
+      "uuid": "f0004f9fca6588d2e56dd1d6deff082f",
+      "puuid": "6590193217b471f2af218961ac24eae5",
+      "title": "PCB_Smart cities V0.1",
+      "filename": "PCB_Smart cities V0.1.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "b73ecc946600486997b70f149e556e90": 2,
+        "20371d26fef24c4a8c8e1b15769fc66d": 1,
+        "b9efc06d0fb742f99a478d48de211eb9": 2
+      },
+      "BOM": [],
+      "updateTime": 1644576556,
+      "createTime": 1644444539,
+      "histories": [],
+      "created_at": "2022-02-09 23:08:59",
+      "updated_at": "2022-02-11 11:49:16"
+    },
+    {
+      "uuid": "ddbf506d2f3bf3a57956a08f47d63ba4",
+      "puuid": "6590193217b471f2af218961ac24eae5",
+      "title": "PCB_Smart cities V0.2",
+      "filename": "PCB_Smart cities V0.2.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "d8f3b09873bf4bf89243089a133a0e9f": 2,
+        "912a75eb908e48e1ac6280fbf7d4259c": 2,
+        "b73ecc946600486997b70f149e556e90": 2,
+        "20371d26fef24c4a8c8e1b15769fc66d": 1,
+        "b9efc06d0fb742f99a478d48de211eb9": 2
+      },
+      "BOM": [],
+      "updateTime": 1647109775,
+      "createTime": 1646999994,
+      "histories": [],
+      "created_at": "2022-03-11 12:59:54",
+      "updated_at": "2022-03-12 19:29:35"
+    }
+  ],
+  "sort": [
+    "fdc0981106764c9380e60248ee251f64",
+    "e1f2bc4804a8f150ca166cc56a27c5d3"
+  ],
+  "title": "Smart cities",
+  "foldername": "Smart cities",
+  "schfilename": "Smart cities.json",
+  "schfilemtime": 1647018233067
+}
