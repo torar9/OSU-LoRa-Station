@@ -83,7 +83,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
 
 /**
  * @brief Callback function for handling LMIC events
- * 
+ *
  * @param pUserData User data
  * @param ev Event type
  */
@@ -115,7 +115,8 @@ void setup()
         sps30_set_fan_auto_cleaning_interval_days(SPS30_CLEAN_INTERVAL_IN_DAYS);
     }*/
 
-    if(!htu.begin()){
+    if (!htu.begin())
+    {
         DBG_PRINTLN(F("Failed to initialize htu"));
         abort();
     }
@@ -163,7 +164,7 @@ void setup()
     LMIC_setAdrMode(0); // email
 
     LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100); // email -> Should not be needed since LMIC version v3.1.0
-    LMIC_registerEventCb( event_callback, NULL);
+    LMIC_registerEventCb(event_callback, NULL);
     LMIC_registerRxMessageCb(rx_callback, NULL);
     //   Start job
     do_send(&sendjob);
@@ -286,10 +287,10 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
         DBG_PRINT(nMessage);
         DBG_PRINTLN(F(" bytes of payload"));
 
-        if(port == 1)//Port 1 -> Set sleep time
+        if (port == 1) // Port 1 -> Set sleep time
         {
             int32_t total = 0;
-            for(size_t i = 0; i < nMessage; i++)
+            for (size_t i = 0; i < nMessage; i++)
             {
                 int32_t tmp = pMessage[i];
                 total = total << 8;
@@ -299,7 +300,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
             DBG_PRINT(F("Converted value: "));
             DBG_PRINTLN(total);
             DBG_PRINTHEX(total);
-            if(total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
+            if (total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
             {
                 TX_INTERVAL = total;
             }
@@ -307,7 +308,8 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
     }
 }
 
-void event_callback(void *pUserData, ev_t ev) {
+void event_callback(void *pUserData, ev_t ev)
+{
     switch (ev)
     {
     case EV_SCAN_TIMEOUT:
@@ -344,7 +346,7 @@ void event_callback(void *pUserData, ev_t ev) {
         break;
     case EV_TXCOMPLETE:
         DBG_PRINTLN(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-        //Schedule next transmission
+        // Schedule next transmission
         os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
         break;
     case EV_LOST_TSYNC:
