@@ -299,7 +299,10 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
             DBG_PRINT(F("Converted value: "));
             DBG_PRINTLN(total);
             Serial.println(total, HEX);
-            TX_INTERVAL = total;
+            if(total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
+            {
+                TX_INTERVAL = total;
+            }
         }
     }
 }

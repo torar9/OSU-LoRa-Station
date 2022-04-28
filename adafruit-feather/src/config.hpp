@@ -8,6 +8,7 @@
 #define TX_TIMER_SECONDS 60
 #define PAYLOAD_BUFFER_SIZE 25
 #define SERIAL_SPEED 9600
+#define MINIMUM_ALLOWED_TX_TIMER_SECONDS 60
 
 #if DEBUG == 1
   #define DBG_SERIAL_BEGIN(x) Serial.begin(x);
