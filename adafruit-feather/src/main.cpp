@@ -294,11 +294,11 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int32_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                Serial.println(pMessage[i], HEX);
+                DBG_PRINTHEX(pMessage[i]);
             }
             DBG_PRINT(F("Converted value: "));
             DBG_PRINTLN(total);
-            Serial.println(total, HEX);
+            DBG_PRINTHEX(total);
             if(total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
             {
                 TX_INTERVAL = total;
