@@ -29,7 +29,7 @@ static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-uint32_t TX_INTERVAL = TX_TIMER_SECONDS;
+const unsigned TX_INTERVAL = TX_TIMER_SECONDS;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
@@ -80,14 +80,6 @@ void onEvent(ev_t ev);
  * @param nMessage Number of bytes in message
  */
 void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessage);
-
-/**
- * @brief Callback function for handling LMIC events
- * 
- * @param pUserData User data
- * @param ev Event type
- */
-void event_callback(void *pUserData, ev_t ev);
 
 /**
  * @brief Setup function contains necessarily things to setup MCU, modules and sensors
@@ -163,7 +155,6 @@ void setup()
     LMIC_setAdrMode(0); // email
 
     LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100); // email -> Should not be needed since LMIC version v3.1.0
-    LMIC_registerEventCb( event_callback, NULL);
     LMIC_registerRxMessageCb(rx_callback, NULL);
     //   Start job
     do_send(&sendjob);
@@ -276,35 +267,8 @@ void do_send(osjob_t *j)
     // Next TX is scheduled after TX_COMPLETE event.
 }
 
-void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessage)
+void onEvent(ev_t ev)
 {
-    if (port != 0 && nMessage != 0)
-    {
-        DBG_PRINTLN("Received downlink");
-        DBG_PRINT(F("port: "));
-        DBG_PRINTLN(port);
-        DBG_PRINT(nMessage);
-        DBG_PRINTLN(F(" bytes of payload"));
-
-        if(port == 1)//Port 1 -> Set sleep time
-        {
-            int32_t total = 0;
-            for(size_t i = 0; i < nMessage; i++)
-            {
-                int32_t tmp = pMessage[i];
-                total = total << 8;
-                total = total | tmp;
-                Serial.println(pMessage[i], HEX);
-            }
-            DBG_PRINT(F("Converted value: "));
-            DBG_PRINTLN(total);
-            Serial.println(total, HEX);
-            TX_INTERVAL = total;
-        }
-    }
-}
-
-void event_callback(void *pUserData, ev_t ev) {
     switch (ev)
     {
     case EV_SCAN_TIMEOUT:
@@ -341,7 +305,17 @@ void event_callback(void *pUserData, ev_t ev) {
         break;
     case EV_TXCOMPLETE:
         DBG_PRINTLN(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-        //Schedule next transmission
+        /*
+        if (LMIC.txrxFlags & TXRX_ACK)
+            DBG_PRINTLN(F("Received ack"));
+        if (LMIC.dataLen != 0 || LMIC.dataBeg != 0)
+        {
+            DBG_PRINTLN(F("Received "));
+            DBG_PRINTLN(LMIC.dataLen);
+            DBG_PRINTLN(F(" bytes of payload"));
+            // rx_callback(bPort, LMIC.frame + LMIC.dataBeg, LMIC.dataLen);
+        }*/
+        // Schedule next transmission
         os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
         break;
     case EV_LOST_TSYNC:
@@ -384,5 +358,17 @@ void event_callback(void *pUserData, ev_t ev) {
         // DBG_PRINT(F("Unknown event: "));
         DBG_PRINTLN((unsigned)ev);
         break;
+    }
+}
+
+void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessage)
+{
+    if (port != 0 && nMessage != 0)
+    {
+        DBG_PRINTLN("Received downlink");
+        DBG_PRINT(F("port: "));
+        DBG_PRINTLN(port);
+        DBG_PRINT(nMessage);
+        DBG_PRINTLN(F(" bytes of payload"));
     }
 }
