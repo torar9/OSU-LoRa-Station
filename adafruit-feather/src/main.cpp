@@ -5,7 +5,6 @@
 #include <sps30.h>
 #include <Adafruit_HTU21DF.h>
 #include <Wire.h>
-#include <Adafruit_SleepyDog.h>
 
 #include "config.hpp"
 
@@ -295,11 +294,11 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int32_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                DBG_PRINTHEX(pMessage[i]);
+                DBG_PRINT_HEX(pMessage[i]);
             }
             DBG_PRINT(F("Converted value: "));
             DBG_PRINTLN(total);
-            DBG_PRINTHEX(total);
+            DBG_PRINT_HEX(total);
             if (total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
             {
                 TX_INTERVAL = total;
