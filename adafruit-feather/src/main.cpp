@@ -28,7 +28,8 @@ static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-uint32_t TX_INTERVAL = TX_TIMER_SECONDS;
+uint32_t tx_interval = TX_TIMER_SECONDS;
+uint8_t sps30_clean_interval_days = SPS30_CLEAN_INTERVAL_IN_DAYS;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
@@ -106,13 +107,10 @@ void setup()
         DBG_PRINTLN(F("Failed to initialize sps30"));
         abort();
     }
-    /*
+
     //By default cleaning interval is set to 168 hours = 1 week
     //If sensor is switched off then counter is reset to 0
-    else
-    {
-        sps30_set_fan_auto_cleaning_interval_days(SPS30_CLEAN_INTERVAL_IN_DAYS);
-    }*/
+    sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
 
     if (!htu.begin())
     {
@@ -299,9 +297,28 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
             DBG_PRINT(F("Converted value: "));
             DBG_PRINTLN(total);
             DBG_PRINT_HEX(total);
-            if (total >= MINIMUM_ALLOWED_TX_TIMER_SECONDS)
+            if (total >= MINIMUM_ALLOWED_TX_TIMER_IN_SECONDS && total <= MAXIMUM_ALLOWED_TX_TIMER_IN_SECONDS)
             {
-                TX_INTERVAL = total;
+                tx_interval = total;
+            }
+        }
+        else if (port == 2) // Port 2 -> Set sps30 clean interval in days
+        {
+            int8_t total = 0;
+            for (size_t i = 0; i < nMessage; i++)
+            {
+                int8_t tmp = pMessage[i];
+                total = total << 8;
+                total = total | tmp;
+                DBG_PRINT_HEX(pMessage[i]);
+            }
+            DBG_PRINT(F("Converted value: "));
+            DBG_PRINTLN(total);
+            DBG_PRINT_HEX(total);
+            if(total >= 1)
+            {
+                sps30_clean_interval_days = total;
+                sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
             }
         }
     }
@@ -346,7 +363,7 @@ void event_callback(void *pUserData, ev_t ev)
     case EV_TXCOMPLETE:
         DBG_PRINTLN(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
         // Schedule next transmission
-        os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(TX_INTERVAL), do_send);
+        os_setTimedCallback(&sendjob, os_getTime() + sec2osticks(tx_interval), do_send);
         break;
     case EV_LOST_TSYNC:
         // DBG_PRINTLN(F("EV_LOST_TSYNC"));
