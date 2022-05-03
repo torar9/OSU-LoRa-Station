@@ -278,7 +278,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
 {
     if (port != 0 && nMessage != 0)
     {
-        DBG_PRINTLN("Received downlink");
+        DBG_PRINTLN("Received downlink:");
         DBG_PRINT(F("port: "));
         DBG_PRINTLN(port);
         DBG_PRINT(nMessage);
