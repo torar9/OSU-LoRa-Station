@@ -4,7 +4,7 @@
   "name": "Smart cities",
   "content": "Adaptér pro Adafruit feather 32u4.",
   "created_at": "2022-02-08 23:36:33",
-  "updated_at": "2022-03-12 19:29:35",
+  "updated_at": "2022-05-03 18:16:18",
   "stick": "",
   "documents": [
     {
@@ -32,13 +32,13 @@
         [
           "100uF",
           2,
-          "CAP-D3.0XF1.5",
+          "CAP-D5.0XF2.0",
           "C1,C2",
           {
             "BOM_Supplier Part": "",
             "BOM_Supplier": "",
             "BOM_Manufacturer Part": "",
-            "puuid": "912a75eb908e48e1ac6280fbf7d4259c",
+            "puuid": "4f22f638eb46492797daf7383bd865c4",
             "uuid": "3daf3ba31c4b4822aca78833d26e95eb"
           }
         ],
@@ -97,11 +97,11 @@
           }
         ]
       ],
-      "updateTime": 1647018233,
+      "updateTime": 1651593414,
       "createTime": 1644359794,
       "histories": [],
       "created_at": "2022-02-08 23:36:34",
-      "updated_at": "2022-03-11 18:03:53"
+      "updated_at": "2022-05-03 17:56:54"
     },
     {
       "uuid": "f0004f9fca6588d2e56dd1d6deff082f",
@@ -127,6 +127,29 @@
     {
       "uuid": "ddbf506d2f3bf3a57956a08f47d63ba4",
       "puuid": "6590193217b471f2af218961ac24eae5",
+      "title": "PCB_Smart cities V0.3",
+      "filename": "PCB_Smart cities V0.3.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "4f22f638eb46492797daf7383bd865c4": 2,
+        "d8f3b09873bf4bf89243089a133a0e9f": 2,
+        "b73ecc946600486997b70f149e556e90": 2,
+        "20371d26fef24c4a8c8e1b15769fc66d": 1,
+        "b9efc06d0fb742f99a478d48de211eb9": 2
+      },
+      "BOM": [],
+      "updateTime": 1651594337,
+      "createTime": 1646999994,
+      "histories": [],
+      "created_at": "2022-03-11 12:59:54",
+      "updated_at": "2022-05-03 18:12:17"
+    },
+    {
+      "uuid": "b6d905fe90864276aab91c537a8a4ef4",
+      "puuid": "6590193217b471f2af218961ac24eae5",
       "title": "PCB_Smart cities V0.2",
       "filename": "PCB_Smart cities V0.2.json",
       "description": "",
@@ -134,18 +157,18 @@
       "master": "",
       "thumb": "/images/thumb-default.png",
       "components": {
+        "4f22f638eb46492797daf7383bd865c4": 2,
         "d8f3b09873bf4bf89243089a133a0e9f": 2,
-        "912a75eb908e48e1ac6280fbf7d4259c": 2,
         "b73ecc946600486997b70f149e556e90": 2,
         "20371d26fef24c4a8c8e1b15769fc66d": 1,
         "b9efc06d0fb742f99a478d48de211eb9": 2
       },
       "BOM": [],
-      "updateTime": 1647109775,
-      "createTime": 1646999994,
+      "updateTime": 1651594578,
+      "createTime": 1651594578,
       "histories": [],
-      "created_at": "2022-03-11 12:59:54",
-      "updated_at": "2022-03-12 19:29:35"
+      "created_at": "2022-05-03 18:16:18",
+      "updated_at": "2022-05-03 18:16:18"
     }
   ],
   "sort": [
@@ -155,5 +178,5 @@
   "title": "Smart cities",
   "foldername": "Smart cities",
   "schfilename": "Smart cities.json",
-  "schfilemtime": 1647018233067
+  "schfilemtime": 1651593414546
 }
