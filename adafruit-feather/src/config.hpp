@@ -14,7 +14,7 @@
 /** @endcond */
 
 /**< Enable or disable Serial prints. For debugging purposes define -D DEBUG=1 in platform.io or create macro here */
-#define DEBUG 0
+#define DEBUG 1
 
 /**< SPS30 cleanign interval in days. */
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7

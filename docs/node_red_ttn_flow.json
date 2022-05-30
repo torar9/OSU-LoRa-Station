@@ -2,7 +2,7 @@
     {
         "id": "4497ebfd.5af1dc",
         "type": "tab",
-        "label": "TTN-Adafruit",
+        "label": "TTN",
         "disabled": false,
         "info": ""
     },
@@ -10,8 +10,8 @@
         "id": "b5f3d60e.e49678",
         "type": "mqtt in",
         "z": "4497ebfd.5af1dc",
-        "name": "adafruit-uplink",
-        "topic": "#",
+        "name": "ttn-all-app-uplinks",
+        "topic": "v3/torar-test-app@ttn/devices/+/up",
         "qos": "0",
         "datatype": "json",
         "broker": "948c1265.268f38",
@@ -19,7 +19,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 90,
+        "x": 110,
         "y": 80,
         "wires": [
             [
@@ -101,7 +101,7 @@
         "type": "function",
         "z": "4497ebfd.5af1dc",
         "name": "insert-uplink-function",
-        "func": "var params = [msg.device_id, msg.temperature, msg.humidity, msg.pm1p0, msg.pm2p5, msg.pm4p0, msg.pm10p0, \nmsg.nc0p5, msg.nc1p0, msg.nc2p5, msg.nc4p0, msg.nc10p0, \nmsg.typical_value, msg.gateway_id, msg.rssi, msg.channel_rssi, msg.snr, msg.received_at];\n\nmsg = {params: params, topic: 'uplink'};\n\nreturn msg;",
+        "func": "var params = [msg.device_id, msg.temperature, msg.humidity, msg.pm1p0, msg.pm2p5, msg.pm4p0, msg.pm10p0, \nmsg.nc0p5, msg.nc1p0, msg.nc2p5, msg.nc4p0, msg.nc10p0, \nmsg.typical_value, msg.gateway_id, msg.rssi, msg.channel_rssi, msg.snr, msg.received_at, msg.raw_json];\n\nmsg = {params: params, topic: 'uplink'};\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -112,7 +112,8 @@
         "wires": [
             [
                 "9e0b939c37942151",
-                "7fd5ef0a5cfa64af"
+                "7fd5ef0a5cfa64af",
+                "4c92ed73b7146bb4"
             ]
         ]
     },
@@ -121,7 +122,7 @@
         "type": "postgresql",
         "z": "4497ebfd.5af1dc",
         "name": "TTN-uplink-store",
-        "query": "insert into ttn.uplink(device_id, temperature, humidity, pm1p0, pm2p5, pm4p0, pm10p0, nc0p5, nc1p0, nc2p5, nc4p0, nc10p0, typical_value, gateway_id, rssi, channel_rssi, snr, received_at) \nvalues($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18);",
+        "query": "insert into ttn.uplink(device_id, temperature, humidity, pm1p0, pm2p5, pm4p0, pm10p0, nc0p5, nc1p0, nc2p5, nc4p0, nc10p0, typical_value, gateway_id, rssi, channel_rssi, snr, received_at, raw_json) \nvalues($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);",
         "postgreSQLConfig": "85ba96bec572a83c",
         "split": false,
         "rowsPerMsg": "2",
@@ -182,12 +183,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 770,
-        "y": 280,
+        "x": 810,
+        "y": 260,
         "wires": [
             [
-                "6c2ad29d14fbb7bd",
-                "9e0b939c37942151"
+                "9e0b939c37942151",
+                "6c2ad29d14fbb7bd"
             ]
         ]
     },
@@ -246,7 +247,8 @@
         "y": 40,
         "wires": [
             [
-                "6c10433789e18b96"
+                "6c10433789e18b96",
+                "c803558a21097d6b"
             ]
         ]
     },
@@ -298,7 +300,9 @@
         "x": 330,
         "y": 80,
         "wires": [
-            []
+            [
+                "c803558a21097d6b"
+            ]
         ]
     },
     {
@@ -430,7 +434,7 @@
         "type": "function",
         "z": "4497ebfd.5af1dc",
         "name": "data-extractor",
-        "func": "var temperature = {};\ntemperature.payload = msg.payload.uplink_message.decoded_payload.temperature;\ntemperature.topic = \"temperature\";\n\nvar humidity = {};\nhumidity.payload = msg.payload.uplink_message.decoded_payload.humidity;\nhumidity.topic = \"humidity\";\n\nvar nc0p5 = {};\nnc0p5.payload = msg.payload.uplink_message.decoded_payload.nc0p5;\nnc0p5.topic = \"nc0p5\";\n\nvar nc1p0 = {};\nnc1p0.payload = msg.payload.uplink_message.decoded_payload.nc1p0;\nnc1p0.topic = \"nc1p0\";\n\nvar nc2p5 = {};\nnc2p5.payload = msg.payload.uplink_message.decoded_payload.nc2p5;\nnc2p5.topic = \"nc2p5\";\n\nvar nc4p0 = {};\nnc4p0.payload = msg.payload.uplink_message.decoded_payload.nc4p0;\nnc4p0.topic = \"nc4p0\";\n\nvar nc10p0 = {};\nnc10p0.payload = msg.payload.uplink_message.decoded_payload.nc10p0;\nnc10p0.topic = \"nc10p0\";\n\nvar pm1p0 = {};\npm1p0.payload = msg.payload.uplink_message.decoded_payload.pm1p0;\npm1p0.topic = \"pm1p0\";\n\nvar pm2p5 = {};\npm2p5.payload = msg.payload.uplink_message.decoded_payload.pm2p5;\npm2p5.topic = \"pm2p5\";\n\nvar pm4p0 = {};\npm4p0.payload = msg.payload.uplink_message.decoded_payload.pm4p0;\npm4p0.topic = \"pm4p0\";\n\nvar pm10p0 = {};\npm10p0.payload = msg.payload.uplink_message.decoded_payload.pm10p0;\npm10p0.topic = \"pm10p0\";\n\nvar typical_value = {};\ntypical_value.payload = msg.payload.uplink_message.decoded_payload.typical_value;\ntypical_value.topic = \"typical_value\";\n\nvar device_id = {};\ndevice_id.payload = msg.payload.end_device_ids.device_id;\ndevice_id.topic = \"device_id\";\n\nvar gateway_id = {};\ngateway_id.payload = msg.payload.uplink_message.rx_metadata[0].gateway_ids.gateway_id;\ngateway_id.topic = \"gateway_id\";\n\nvar rssi = {};\nrssi.payload = msg.payload.uplink_message.rx_metadata[0].rssi;\nrssi.topic = \"rssi\";\n\nvar channel_rssi = {};\nchannel_rssi.payload = msg.payload.uplink_message.rx_metadata[0].channel_rssi;\nchannel_rssi.topic = \"channel_rssi\";\n\nvar snr = {};\nsnr.payload = msg.payload.uplink_message.rx_metadata[0].snr;\nsnr.topic = \"snr\";\n\nvar received_at = {};\nreceived_at.payload = msg.payload.received_at;\nreceived_at.topic = \"received_at\";\n\nmsg = {\n    temperature: temperature.payload,\n    humidity: humidity.payload,\n    nc0p5: nc0p5.payload,\n    nc1p0: nc1p0.payload,\n    nc2p5: nc2p5.payload,\n    nc4p0: nc4p0.payload,\n    nc10p0: nc10p0.payload,\n    pm1p0: pm1p0.payload,\n    pm2p5: pm2p5.payload,\n    pm4p0: pm4p0.payload,\n    pm10p0: pm10p0.payload,\n    typical_value: typical_value.payload,\n    device_id: device_id.payload,\n    gateway_id: gateway_id.payload,\n    rssi: rssi.payload,\n    channel_rssi: channel_rssi.payload,\n    snr: snr.payload,\n    received_at: received_at.payload\n};\n\nreturn msg;",
+        "func": "var temperature = {};\ntemperature.payload = msg.payload.uplink_message.decoded_payload.temperature;\ntemperature.topic = \"temperature\";\n\nvar humidity = {};\nhumidity.payload = msg.payload.uplink_message.decoded_payload.humidity;\nhumidity.topic = \"humidity\";\n\nvar nc0p5 = {};\nnc0p5.payload = msg.payload.uplink_message.decoded_payload.nc0p5;\nnc0p5.topic = \"nc0p5\";\n\nvar nc1p0 = {};\nnc1p0.payload = msg.payload.uplink_message.decoded_payload.nc1p0;\nnc1p0.topic = \"nc1p0\";\n\nvar nc2p5 = {};\nnc2p5.payload = msg.payload.uplink_message.decoded_payload.nc2p5;\nnc2p5.topic = \"nc2p5\";\n\nvar nc4p0 = {};\nnc4p0.payload = msg.payload.uplink_message.decoded_payload.nc4p0;\nnc4p0.topic = \"nc4p0\";\n\nvar nc10p0 = {};\nnc10p0.payload = msg.payload.uplink_message.decoded_payload.nc10p0;\nnc10p0.topic = \"nc10p0\";\n\nvar pm1p0 = {};\npm1p0.payload = msg.payload.uplink_message.decoded_payload.pm1p0;\npm1p0.topic = \"pm1p0\";\n\nvar pm2p5 = {};\npm2p5.payload = msg.payload.uplink_message.decoded_payload.pm2p5;\npm2p5.topic = \"pm2p5\";\n\nvar pm4p0 = {};\npm4p0.payload = msg.payload.uplink_message.decoded_payload.pm4p0;\npm4p0.topic = \"pm4p0\";\n\nvar pm10p0 = {};\npm10p0.payload = msg.payload.uplink_message.decoded_payload.pm10p0;\npm10p0.topic = \"pm10p0\";\n\nvar typical_value = {};\ntypical_value.payload = msg.payload.uplink_message.decoded_payload.typical_value;\ntypical_value.topic = \"typical_value\";\n\nvar device_id = {};\ndevice_id.payload = msg.payload.end_device_ids.device_id;\ndevice_id.topic = \"device_id\";\n\nvar gateway_id = {};\ngateway_id.payload = msg.payload.uplink_message.rx_metadata[0].gateway_ids.gateway_id;\ngateway_id.topic = \"gateway_id\";\n\nvar rssi = {};\nrssi.payload = msg.payload.uplink_message.rx_metadata[0].rssi;\nrssi.topic = \"rssi\";\n\nvar channel_rssi = {};\nchannel_rssi.payload = msg.payload.uplink_message.rx_metadata[0].channel_rssi;\nchannel_rssi.topic = \"channel_rssi\";\n\nvar snr = {};\nsnr.payload = msg.payload.uplink_message.rx_metadata[0].snr;\nsnr.topic = \"snr\";\n\nvar received_at = {};\nreceived_at.payload = msg.payload.received_at;\nreceived_at.topic = \"received_at\";\n\nvar raw_json = {};\nraw_json.payload = msg.payload;\nraw_json.topic = \"raw_json\";\n\nmsg = {\n    temperature: temperature.payload,\n    humidity: humidity.payload,\n    nc0p5: nc0p5.payload,\n    nc1p0: nc1p0.payload,\n    nc2p5: nc2p5.payload,\n    nc4p0: nc4p0.payload,\n    nc10p0: nc10p0.payload,\n    pm1p0: pm1p0.payload,\n    pm2p5: pm2p5.payload,\n    pm4p0: pm4p0.payload,\n    pm10p0: pm10p0.payload,\n    typical_value: typical_value.payload,\n    device_id: device_id.payload,\n    gateway_id: gateway_id.payload,\n    rssi: rssi.payload,\n    channel_rssi: channel_rssi.payload,\n    snr: snr.payload,\n    received_at: received_at.payload,\n    raw_json: raw_json.payload\n};\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -444,6 +448,40 @@
                 "ff4fdb338d3a78c4"
             ]
         ]
+    },
+    {
+        "id": "c803558a21097d6b",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "4c92ed73b7146bb4",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 140,
+        "wires": []
     },
     {
         "id": "948c1265.268f38",
@@ -484,10 +522,10 @@
         "databaseFieldType": "str",
         "ssl": "true",
         "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
         "max": "10",
         "maxFieldType": "num",
-        "min": "1",
-        "minFieldType": "num",
         "idle": "1000",
         "idleFieldType": "num",
         "connectionTimeout": "10000",
