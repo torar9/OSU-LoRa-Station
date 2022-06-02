@@ -10,16 +10,16 @@
 
 // LoRaWAN NwkSKey, network session key
 // This should be in big-endian (aka msb).
-static const PROGMEM u1_t NWKSKEY[16] = {0xD1, 0xD1, 0x1D, 0x51, 0x34, 0x68, 0xFD, 0x5A, 0x3D, 0x67, 0x2D, 0xB5, 0x8B, 0x54, 0x8E, 0xD1};
+static const PROGMEM u1_t NWKSKEY[16] = {0xA1, 0xA7, 0x45, 0x79, 0x4B, 0xC7, 0x2D, 0x65, 0xD3, 0x8E, 0xF2, 0x4E, 0x3F, 0x7E, 0xEA, 0x12};
 
 // LoRaWAN AppSKey, application session key
 // This should also be in big-endian (aka msb).
-static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x33, 0xF1, 0xAF, 0xC4, 0x0D, 0x64, 0xE5, 0x97, 0x34, 0x6B};
+static const u1_t PROGMEM APPSKEY[16] = {0x74, 0xF1, 0x06, 0x2D, 0x02, 0x3A, 0x35, 0x46, 0x6D, 0xE8, 0x57, 0x41, 0xB3, 0x9D, 0x8C, 0x9C};
 
 // LoRaWAN end-device address (DevAddr)
 // See http://thethingsnetwork.org/wiki/AddressSpace
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
-static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
+static const u4_t DEVADDR = 0x260B1E51; // <-- Change this address for every node!
 
 // Payload array, contains data to be transmitted over to TTN network.
 static uint8_t payload[PAYLOAD_BUFFER_SIZE];
@@ -104,10 +104,12 @@ void setup()
     sensirion_i2c_init();
     if (sps30_probe() != 0)
     {
-        DBG_PRINTLN(F("Failed to initialize sps30"));
-        abort();
+        if (sps30_probe() != 0)
+        {
+            DBG_PRINTLN(F("Failed to initialize sps30"));
+            abort();
+        }
     }
-
     //By default cleaning interval is set to 168 hours = 1 week
     //If sensor is switched off then counter is reset to 0
     sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);

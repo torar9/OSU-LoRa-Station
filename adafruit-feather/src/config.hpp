@@ -14,13 +14,13 @@
 /** @endcond */
 
 /**< Enable or disable Serial prints. For debugging purposes define -D DEBUG=1 in platform.io or create macro here */
-#define DEBUG 1
+#define DEBUG 0
 
-/**< SPS30 cleanign interval in days. */
+/**< SPS30 cleaning interval in days. */
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7
 
 /**< Default time for data transmission interval in seconds. */
-#define TX_TIMER_SECONDS 60
+#define TX_TIMER_SECONDS 3600
 
 /**< Payload(array containing data) buffer size. */
 #define PAYLOAD_BUFFER_SIZE 25
