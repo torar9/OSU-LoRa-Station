@@ -1,0 +1,22 @@
+################################################################################
+# Node-RED Compose
+################################################################################
+# docker-compose -f node-red.yml -p node-red up -d                       
+################################################################################
+version: "3.7"
+
+services:
+  node-red:
+    image: nodered/node-red:latest
+    environment:
+      - TZ=Europe/Amsterdam
+    volumes:
+      - node_red_data:/data
+    container_name: node-red
+    restart: always
+    network_mode: "host"
+
+
+volumes:
+  node_red_data:
+    external: true
