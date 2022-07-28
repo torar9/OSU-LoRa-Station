@@ -20,7 +20,7 @@
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7
 
 /**< Default time for data transmission interval in seconds. */
-#define TX_TIMER_SECONDS 3600
+#define TX_TIMER_SECONDS 3600//3600
 
 /**< Payload(array containing data) buffer size. */
 #define PAYLOAD_BUFFER_SIZE 25
