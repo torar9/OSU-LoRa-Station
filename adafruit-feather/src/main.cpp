@@ -10,16 +10,16 @@
 
 // LoRaWAN NwkSKey, network session key
 // This should be in big-endian (aka msb).
-static const PROGMEM u1_t NWKSKEY[16] = {0x96, 0x1B, 0x52, 0x19, 0x4F, 0xF8, 0x76, 0x03, 0x22, 0xE8, 0x24, 0x32, 0xF1, 0xAB, 0x25, 0xD6};
+static const PROGMEM u1_t NWKSKEY[16] = {};
 
 // LoRaWAN AppSKey, application session key
 // This should also be in big-endian (aka msb).
-static const u1_t PROGMEM APPSKEY[16] = {0x2B, 0x4E, 0x49, 0x27, 0x54, 0x04, 0xC4, 0x77, 0xC1, 0x81, 0x07, 0x24, 0xD9, 0xAB, 0xED, 0xAA};
+static const u1_t PROGMEM APPSKEY[16] = {};
 
 // LoRaWAN end-device address (DevAddr)
 // See http://thethingsnetwork.org/wiki/AddressSpace
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
-static const u4_t DEVADDR = 0x260B0F26; // <-- Change this address for every node!
+static const u4_t DEVADDR = ; // <-- Change this address for every node!
 
 // Payload array, contains data to be transmitted over to TTN network.
 static uint8_t payload[PAYLOAD_BUFFER_SIZE];
@@ -102,6 +102,12 @@ void setup()
     delay(3000); // per sample code on RF_95 test
     DBG_PRINTLN("Waited 3 s");
 #endif
+    DBG_PRINTLN("Initializing...");
+    if (!htu.begin()) // vymazat debug printy i v begin funkci!
+    {
+        DBG_PRINTLN(F("Failed to initialize htu"));
+        abort();
+    }
 
     sensirion_i2c_init();
 
@@ -113,12 +119,6 @@ void setup()
     //By default cleaning interval is set to 168 hours = 1 week
     //If sensor is switched off then counter is reset to 0
     sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
-
-    if (!htu.begin())
-    {
-        DBG_PRINTLN(F("Failed to initialize htu"));
-        abort();
-    }
 
     // LMIC init
     os_init();
