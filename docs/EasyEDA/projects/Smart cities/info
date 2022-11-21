@@ -4,7 +4,7 @@
   "name": "Smart cities",
   "content": "Adaptér pro Adafruit feather 32u4.",
   "created_at": "2022-02-08 23:36:33",
-  "updated_at": "2022-05-03 18:16:18",
+  "updated_at": "2022-11-17 16:54:48",
   "stick": "",
   "documents": [
     {
@@ -97,11 +97,11 @@
           }
         ]
       ],
-      "updateTime": 1651593414,
+      "updateTime": 1666203463,
       "createTime": 1644359794,
       "histories": [],
       "created_at": "2022-02-08 23:36:34",
-      "updated_at": "2022-05-03 17:56:54"
+      "updated_at": "2022-10-19 20:17:43"
     },
     {
       "uuid": "f0004f9fca6588d2e56dd1d6deff082f",
@@ -169,6 +169,29 @@
       "histories": [],
       "created_at": "2022-05-03 18:16:18",
       "updated_at": "2022-05-03 18:16:18"
+    },
+    {
+      "uuid": "574a131be330b9d5047c3c8e5880366c",
+      "puuid": "6590193217b471f2af218961ac24eae5",
+      "title": "PCB_Smart cities V0.4",
+      "filename": "PCB_Smart cities V0.4.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "4f22f638eb46492797daf7383bd865c4": 2,
+        "d8f3b09873bf4bf89243089a133a0e9f": 2,
+        "b73ecc946600486997b70f149e556e90": 2,
+        "b9efc06d0fb742f99a478d48de211eb9": 2,
+        "20371d26fef24c4a8c8e1b15769fc66d": 1
+      },
+      "BOM": [],
+      "updateTime": 1668700488,
+      "createTime": 1668691481,
+      "histories": [],
+      "created_at": "2022-11-17 14:24:41",
+      "updated_at": "2022-11-17 16:54:48"
     }
   ],
   "sort": [
@@ -178,5 +201,5 @@
   "title": "Smart cities",
   "foldername": "Smart cities",
   "schfilename": "Smart cities.json",
-  "schfilemtime": 1651593414546
+  "schfilemtime": 1666203463722
 }
