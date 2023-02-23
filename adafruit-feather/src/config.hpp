@@ -13,11 +13,17 @@
  ***********************************************/
 /** @endcond */
 
-/**< Enable or disable Serial prints. For debugging purposes define -D DEBUG=1 in platform.io or create macro here */
+/**< Enable or disable Serial prints. For debugging purposes define -D DEBUG=1 in platformio.ini or create macro here */
 #define DEBUG 1
 
 /**< SPS30 cleaning interval in days. */
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7
+
+/**< Delay between measurements start */
+#define DEFAULT_MEASUREMENT_DELAY 60
+
+/**< Delay between measurements start */
+#define MAX_MEASUREMENT_DELAY 600
 
 /**< Default time for data transmission interval in seconds. */
 #define TX_TIMER_SECONDS 3600//3600

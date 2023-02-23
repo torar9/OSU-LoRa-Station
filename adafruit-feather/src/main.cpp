@@ -30,6 +30,7 @@ static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // cycle limitations).
 uint32_t tx_interval = TX_TIMER_SECONDS;
 uint8_t sps30_clean_interval_days = SPS30_CLEAN_INTERVAL_IN_DAYS;
+uint32_t measurement_delay = DEFAULT_MEASUREMENT_DELAY;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
@@ -100,15 +101,13 @@ void setup()
         ; // wait for Serial to be initialized
     DBG_SERIAL_BEGIN(SERIAL_SPEED);
     delay(3000); // per sample code on RF_95 test
-    DBG_PRINTLN("Waited 3 s");
+    //DBG_PRINTLN("Wait 3 sec");
 #endif
-    DBG_PRINTLN("Initializing...");
-    if (!htu.begin()) // vymazat debug printy i v begin funkci!
+    if (!htu.begin())
     {
-        DBG_PRINTLN(F("Failed to initialize htu"));
         abort();
     }
-
+    
     sensirion_i2c_init();
 
     while (sps30_probe() != 0)
@@ -161,8 +160,8 @@ void setup()
 
     // Set data rate and transmit power for uplink
     //LMIC_setDrTxpow(DR_SF7, 14); // default
-    LMIC_setDrTxpow(DR_SF9, 14); // email
-    LMIC_setAdrMode(0); // email
+    LMIC_setDrTxpow(DR_SF9, 14);
+    LMIC_setAdrMode(0);
 
     LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100); // email -> Should not be needed since LMIC version v3.1.0
     LMIC_registerEventCb(event_callback, NULL);
@@ -219,21 +218,22 @@ void do_send(osjob_t *j)
         float hum = NAN;
 
         temp = htu.readTemperature();
-        // DBG_PRINT(F("Temp: "));
-        // DBG_PRINTLN(temp);
+        //DBG_PRINT(F("Temp: "));
+        DBG_PRINTLN(temp);
 
         hum = htu.readHumidity();
-        // DBG_PRINT(F("Humidity: "));
-        // DBG_PRINTLN(hum);
+        //DBG_PRINT(F("Humidity: "));
+        DBG_PRINTLN(hum);
 
         sps30_start_measurement();
+        delay(measurement_delay * 1000);
         do
         {
             ret = sps30_read_data_ready(&data_ready);
             if (ret < 0)
             {
                 DBG_PRINT(F("SPS30 measure error"));
-                DBG_PRINTLN(ret);
+                //DBG_PRINTLN(ret);
             }
             else if (data_ready)
                 break;
@@ -263,7 +263,7 @@ void do_send(osjob_t *j)
                 DBG_PRINT(F("NC 10.0: "));
                 DBG_PRINTLN(m.nc_10p0);
 
-                DBG_PRINT("Typical partical size: ");
+                DBG_PRINT(F("Typical partical size: "));
                 DBG_PRINTLN(m.typical_particle_size);*/
 
         saveToPayload(temp, payload, 0); // Save data to payload at [0] and [1]
@@ -271,9 +271,9 @@ void do_send(osjob_t *j)
         saveToPayload(m, payload, 4);    // Save data to payload at [4] and to [23]
 
         // Prepare upstream data transmission at the next possible time.
-        DBG_PRINTLN(sizeof(payload));
+        //DBG_PRINTLN(sizeof(payload));
         LMIC_setTxData2(1, payload, sizeof(payload) - 1, 0);
-        DBG_PRINTLN(F("Packet queued"));
+        //DBG_PRINTLN(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -281,12 +281,12 @@ void do_send(osjob_t *j)
 void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessage)
 {
     if (port != 0 && nMessage != 0)
-    {
+    {/*
         DBG_PRINTLN("Received downlink:");
         DBG_PRINT(F("port: "));
         DBG_PRINTLN(port);
         DBG_PRINT(nMessage);
-        DBG_PRINTLN(F(" bytes of payload"));
+        DBG_PRINTLN(F(" bytes of payload"));*/
 
         if (port == 1) // Port 1 -> Set sleep time
         {
@@ -298,9 +298,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 total = total | tmp;
                 DBG_PRINT_HEX(pMessage[i]);
             }
-            DBG_PRINT(F("Converted value: "));
-            DBG_PRINTLN(total);
-            DBG_PRINT_HEX(total);
+
             if (total >= MINIMUM_ALLOWED_TX_TIMER_IN_SECONDS && total <= MAXIMUM_ALLOWED_TX_TIMER_IN_SECONDS)
             {
                 tx_interval = total;
@@ -314,15 +312,28 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int8_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                DBG_PRINT_HEX(pMessage[i]);
             }
-            DBG_PRINT(F("Converted value: "));
-            DBG_PRINTLN(total);
-            DBG_PRINT_HEX(total);
+
             if(total >= 1)
             {
                 sps30_clean_interval_days = total;
                 sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
+            }
+        }
+        else if (port == 3) // Port 3 -> Set delay (in seconds) before measurement (SPS30 needs to stabilize before measurement)
+        {
+            int8_t total = 0;
+            for (size_t i = 0; i < nMessage; i++)
+            {
+                int8_t tmp = pMessage[i];
+                total = total << 8;
+                total = total | tmp;
+                DBG_PRINT_HEX(pMessage[i]);
+            }
+
+            if(total >= MAX_MEASUREMENT_DELAY || total < 0)
+            {
+                measurement_delay = 0;
             }
         }
     }
