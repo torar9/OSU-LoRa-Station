@@ -31,6 +31,7 @@ static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 uint32_t tx_interval = TX_TIMER_SECONDS;
 uint8_t sps30_clean_interval_days = SPS30_CLEAN_INTERVAL_IN_DAYS;
 uint32_t measurement_delay = DEFAULT_MEASUREMENT_DELAY;
+boolean measurement_stop = MEASUREMENT_STOP;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
@@ -91,6 +92,12 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
 void event_callback(void *pUserData, ev_t ev);
 
 /**
+ * @brief Reset function
+ * Resets MCU
+ */
+void(* resetFunc) (void) = 0;
+
+/**
  * @brief Setup function contains necessarily things to setup MCU, modules and sensors
  *
  */
@@ -105,7 +112,7 @@ void setup()
 #endif
     if (!htu.begin())
     {
-        abort();
+        resetFunc();
     }
     
     sensirion_i2c_init();
@@ -219,14 +226,20 @@ void do_send(osjob_t *j)
 
         temp = htu.readTemperature();
         //DBG_PRINT(F("Temp: "));
-        DBG_PRINTLN(temp);
+        //DBG_PRINTLN(temp);
 
         hum = htu.readHumidity();
         //DBG_PRINT(F("Humidity: "));
-        DBG_PRINTLN(hum);
+        //DBG_PRINTLN(hum);
 
         sps30_start_measurement();
-        delay(measurement_delay * 1000);
+
+        if(measurement_stop)
+        {
+            DBG_PRINTLN("del");
+            delay(measurement_delay * 1000);
+        }
+
         do
         {
             ret = sps30_read_data_ready(&data_ready);
@@ -241,7 +254,12 @@ void do_send(osjob_t *j)
         } while (1);
 
         ret = sps30_read_measurement(&m);
-        sps30_stop_measurement();
+        
+        if(measurement_stop)
+        {
+            DBG_PRINTLN("stopping");
+            sps30_stop_measurement();
+        }
         /*
                 DBG_PRINT(F("PM  1.0: "));
                 DBG_PRINTLN(m.mc_1p0);
@@ -296,7 +314,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int32_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                DBG_PRINT_HEX(pMessage[i]);
+                //DBG_PRINT_HEX(pMessage[i]);
             }
 
             if (total >= MINIMUM_ALLOWED_TX_TIMER_IN_SECONDS && total <= MAXIMUM_ALLOWED_TX_TIMER_IN_SECONDS)
@@ -320,7 +338,9 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
             }
         }
-        else if (port == 3) // Port 3 -> Set delay (in seconds) before measurement (SPS30 needs to stabilize before measurement)
+        // Port 3 -> Set delay (in seconds) before measurement (SPS30 needs to stabilize before measurement)
+        // This setting is overriden by port 4 -> whetever or not to stop measurement after transmission
+        else if (port == 3) 
         {
             int8_t total = 0;
             for (size_t i = 0; i < nMessage; i++)
@@ -328,12 +348,36 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int8_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                DBG_PRINT_HEX(pMessage[i]);
+                //DBG_PRINT_HEX(pMessage[i]);
             }
 
             if(total >= MAX_MEASUREMENT_DELAY || total < 0)
             {
                 measurement_delay = 0;
+            }
+            else
+            {
+                measurement_delay = total;
+            }
+        }
+        else if (port == 4) // Port 4 -> Set whetever or not to stop measurement -> this override port 3 settings
+        {
+            int8_t total = 0;
+            for (size_t i = 0; i < nMessage; i++)
+            {
+                int8_t tmp = pMessage[i];
+                total = total << 8;
+                total = total | tmp;
+                //DBG_PRINT_HEX(pMessage[i]);
+            }
+
+            if(total > 0)
+            {
+                measurement_stop = false;
+            }
+            else
+            {
+                measurement_stop = true;
             }
         }
     }
