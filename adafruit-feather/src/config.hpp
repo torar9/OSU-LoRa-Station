@@ -14,22 +14,30 @@
 /** @endcond */
 
 /**< Enable or disable Serial prints. For debugging purposes define -D DEBUG=1 in platformio.ini or create macro here */
-#define DEBUG 0
+#define DEBUG 1
+
+#define REFERENCE 1
+
+#if REFERENCE == 1
+  #define UPLOAD_PORT 2
+#else
+  #define UPLOAD_PORT 1
+#endif
 
 /**< SPS30 cleaning interval in days. */
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7
 
-/**< Delay between measurements start */
-#define DEFAULT_MEASUREMENT_DELAY 0
+/**< Default delay between measurements start */
+#define DEFAULT_MEASUREMENT_DELAY 0 // 60
 
-/**< Delay between measurements start */
+/**< Max delay between measurements start */
 #define MAX_MEASUREMENT_DELAY 900
 
 /**< Whatever or not to stop delay start */
 #define MEASUREMENT_STOP true
 
 /**< Default time for data transmission interval in seconds. */
-#define TX_TIMER_SECONDS 3600//3600
+#define TX_TIMER_SECONDS 60//3600 ; 540
 
 /**< Payload(array containing data) buffer size. */
 #define PAYLOAD_BUFFER_SIZE 25

@@ -2,29 +2,35 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
-#include <sps30.h>
-#include <Adafruit_HTU21DF.h>
 #include <Wire.h>
+#include <Adafruit_MAX31865.h>
+#include <Adafruit_HTU21DF.h>
+#include <sps30.h>
 
 #include "config.hpp"
 
 // LoRaWAN NwkSKey, network session key
 // This should be in big-endian (aka msb).
-static const PROGMEM u1_t NWKSKEY[16] = {};
+static const PROGMEM u1_t NWKSKEY[16] = {0xD1, 0xD1, 0x1D, 0x51, 0x34, 0x68, 0xFD, 0x5A, 0x3D, 0x67, 0x2D, 0xB5, 0x8B, 0x54, 0x8E, 0xD1};
 
 // LoRaWAN AppSKey, application session key
 // This should also be in big-endian (aka msb).
-static const u1_t PROGMEM APPSKEY[16] = {};
+static const u1_t PROGMEM APPSKEY[16] = {0x94, 0x8D, 0x58, 0x25, 0xD0, 0x70, 0x33, 0xF1, 0xAF, 0xC4, 0x0D, 0x64, 0xE5, 0x97, 0x34, 0x6B};
 
 // LoRaWAN end-device address (DevAddr)
 // See http://thethingsnetwork.org/wiki/AddressSpace
 // The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
-static const u4_t DEVADDR = ; // <-- Change this address for every node!
+static const u4_t DEVADDR = 0x260BE63A; // <-- Change this address for every node!
 
 // Payload array, contains data to be transmitted over to TTN network.
 static uint8_t payload[PAYLOAD_BUFFER_SIZE];
 static osjob_t sendjob;
+
+#if REFERENCE == 1
+Adafruit_MAX31865 max = Adafruit_MAX31865(10);
+#else
 static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
+#endif
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
@@ -95,7 +101,7 @@ void event_callback(void *pUserData, ev_t ev);
  * @brief Reset function
  * Resets MCU
  */
-void(* resetFunc) (void) = 0;
+void (*resetFunc)(void) = 0;
 
 /**
  * @brief Setup function contains necessarily things to setup MCU, modules and sensors
@@ -108,23 +114,28 @@ void setup()
         ; // wait for Serial to be initialized
     DBG_SERIAL_BEGIN(SERIAL_SPEED);
     delay(3000); // per sample code on RF_95 test
-    //DBG_PRINTLN("Wait 3 sec");
+    // DBG_PRINTLN("Wait 3 sec");
 #endif
+
+#if REFERENCE == 1
+    max.begin(MAX31865_4WIRE);
+#else
     if (!htu.begin())
     {
         resetFunc();
     }
-    
+
     sensirion_i2c_init();
 
     while (sps30_probe() != 0)
     {
         delay(500);
     }
-    
-    //By default cleaning interval is set to 168 hours = 1 week
-    //If sensor is switched off then counter is reset to 0
+
+    // By default cleaning interval is set to 168 hours = 1 week
+    // If sensor is switched off then counter is reset to 0
     sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
+#endif
 
     // LMIC init
     os_init();
@@ -162,11 +173,11 @@ void setup()
     // TTN uses SF9 for its RX2 window.
     LMIC.dn2Dr = DR_SF9;
 
-    LMIC.rxDelay = 1;// zkouška
-    LMIC.rx1DrOffset = 0;// zkouška
+    LMIC.rxDelay = 1;     // zkouška
+    LMIC.rx1DrOffset = 0; // zkouška
 
     // Set data rate and transmit power for uplink
-    //LMIC_setDrTxpow(DR_SF7, 14); // default
+    // LMIC_setDrTxpow(DR_SF7, 14); // default
     LMIC_setDrTxpow(DR_SF9, 14);
     LMIC_setAdrMode(0);
 
@@ -221,20 +232,53 @@ void do_send(osjob_t *j)
         struct sps30_measurement m;
         uint16_t data_ready;
         int16_t ret;
+
         float temp = NAN;
         float hum = NAN;
 
+#if REFERENCE == 1
+
+        if (measurement_stop)
+        {
+            delay(measurement_delay * 1000);
+        }
+
+        uint16_t rtd = max.readRTD();
+        temp = max.calculateTemperature(rtd, 1000.0, 4300);
+
+        uint8_t maxFault = max.readFault();
+        if (maxFault != MAX31865_FAULT_NONE)
+        {
+            DBG_PRINT(F("MAX31865 FAULT: "))
+            DBG_PRINTLN(max.readFault());
+        }
+
+        DBG_PRINT(F("Temp: "));
+        DBG_PRINTLN(temp);
+
+        m.mc_10p0 = 0.0;
+        m.mc_1p0 = 0.0;
+        m.mc_2p5 = 0.0;
+        m.mc_4p0 = 0.0;
+        m.nc_0p5 = 0.0;
+        m.nc_10p0 = 0.0;
+        m.nc_1p0 = 0.0;
+        m.nc_2p5 = 0.0;
+        m.nc_4p0 = 0.0;
+        m.typical_particle_size = 0.0;
+        hum = 0.0;
+#else
         temp = htu.readTemperature();
-        //DBG_PRINT(F("Temp: "));
-        //DBG_PRINTLN(temp);
+        DBG_PRINT(F("Temp: "));
+        DBG_PRINTLN(temp);
 
         hum = htu.readHumidity();
-        //DBG_PRINT(F("Humidity: "));
-        //DBG_PRINTLN(hum);
+        DBG_PRINT(F("Humidity: "));
+        DBG_PRINTLN(hum);
 
         sps30_start_measurement();
 
-        if(measurement_stop)
+        if (measurement_stop)
         {
             DBG_PRINTLN("del");
             delay(measurement_delay * 1000);
@@ -246,7 +290,7 @@ void do_send(osjob_t *j)
             if (ret < 0)
             {
                 DBG_PRINT(F("SPS30 measure error"));
-                //DBG_PRINTLN(ret);
+                // DBG_PRINTLN(ret);
             }
             else if (data_ready)
                 break;
@@ -254,10 +298,10 @@ void do_send(osjob_t *j)
         } while (1);
 
         ret = sps30_read_measurement(&m);
-        
-        if(measurement_stop)
+
+        if (measurement_stop)
         {
-            DBG_PRINTLN("stopping");
+            // DBG_PRINTLN("stopping");
             sps30_stop_measurement();
         }
         /*
@@ -287,11 +331,12 @@ void do_send(osjob_t *j)
         saveToPayload(temp, payload, 0); // Save data to payload at [0] and [1]
         saveToPayload(hum, payload, 2);  // Save data to payload at [2] and [3]
         saveToPayload(m, payload, 4);    // Save data to payload at [4] and to [23]
+#endif
 
         // Prepare upstream data transmission at the next possible time.
-        //DBG_PRINTLN(sizeof(payload));
-        LMIC_setTxData2(1, payload, sizeof(payload) - 1, 0);
-        //DBG_PRINTLN(F("Packet queued"));
+        // DBG_PRINTLN(sizeof(payload));
+        LMIC_setTxData2(UPLOAD_PORT, payload, sizeof(payload) - 1, 0);
+        // DBG_PRINTLN(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -299,12 +344,12 @@ void do_send(osjob_t *j)
 void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessage)
 {
     if (port != 0 && nMessage != 0)
-    {/*
-        DBG_PRINTLN("Received downlink:");
-        DBG_PRINT(F("port: "));
-        DBG_PRINTLN(port);
-        DBG_PRINT(nMessage);
-        DBG_PRINTLN(F(" bytes of payload"));*/
+    { /*
+         DBG_PRINTLN("Received downlink:");
+         DBG_PRINT(F("port: "));
+         DBG_PRINTLN(port);
+         DBG_PRINT(nMessage);
+         DBG_PRINTLN(F(" bytes of payload"));*/
 
         if (port == 1) // Port 1 -> Set sleep time
         {
@@ -314,7 +359,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int32_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                //DBG_PRINT_HEX(pMessage[i]);
+                // DBG_PRINT_HEX(pMessage[i]);
             }
 
             if (total >= MINIMUM_ALLOWED_TX_TIMER_IN_SECONDS && total <= MAXIMUM_ALLOWED_TX_TIMER_IN_SECONDS)
@@ -332,7 +377,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 total = total | tmp;
             }
 
-            if(total >= 1)
+            if (total >= 1)
             {
                 sps30_clean_interval_days = total;
                 sps30_set_fan_auto_cleaning_interval_days(sps30_clean_interval_days);
@@ -340,7 +385,7 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
         }
         // Port 3 -> Set delay (in seconds) before measurement (SPS30 needs to stabilize before measurement)
         // This setting is overriden by port 4 -> whetever or not to stop measurement after transmission
-        else if (port == 3) 
+        else if (port == 3)
         {
             int8_t total = 0;
             for (size_t i = 0; i < nMessage; i++)
@@ -348,10 +393,10 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int8_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                //DBG_PRINT_HEX(pMessage[i]);
+                // DBG_PRINT_HEX(pMessage[i]);
             }
 
-            if(total >= MAX_MEASUREMENT_DELAY || total < 0)
+            if (total >= MAX_MEASUREMENT_DELAY || total < 0)
             {
                 measurement_delay = 0;
             }
@@ -368,10 +413,10 @@ void rx_callback(void *pUserData, u1_t port, const u1_t *pMessage, size_t nMessa
                 int8_t tmp = pMessage[i];
                 total = total << 8;
                 total = total | tmp;
-                //DBG_PRINT_HEX(pMessage[i]);
+                // DBG_PRINT_HEX(pMessage[i]);
             }
 
-            if(total > 0)
+            if (total > 0)
             {
                 measurement_stop = false;
             }
