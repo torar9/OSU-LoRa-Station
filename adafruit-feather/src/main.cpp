@@ -27,7 +27,7 @@ static uint8_t payload[PAYLOAD_BUFFER_SIZE];
 static osjob_t sendjob;
 
 #if REFERENCE == 1
-Adafruit_MAX31865 max = Adafruit_MAX31865(10);
+Adafruit_MAX31865 max = Adafruit_MAX31865(10, 13, 12, 11);
 #else
 static Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 #endif
@@ -118,7 +118,10 @@ void setup()
 #endif
 
 #if REFERENCE == 1
-    max.begin(MAX31865_4WIRE);
+    if(!max.begin(MAX31865_4WIRE))
+    {
+        DBG_PRINTLN("Unable to init MAX31865!");
+    }
 #else
     if (!htu.begin())
     {
@@ -249,10 +252,29 @@ void do_send(osjob_t *j)
         uint8_t maxFault = max.readFault();
         if (maxFault != MAX31865_FAULT_NONE)
         {
+            if(maxFault == MAX31865_FAULT_HIGHTHRESH)
+                DBG_PRINTLN(F("hightresh"));
+            if(maxFault == MAX31865_FAULT_LOWTHRESH)
+                DBG_PRINTLN(F("lowtresh"));
+            if(maxFault == MAX31865_FAULT_MANUAL_FINISH)
+                DBG_PRINTLN(F("manual fin"));
+            if(maxFault == MAX31865_FAULT_MANUAL_RUN)
+                DBG_PRINTLN(F("manual run"));
+            if(maxFault == MAX31865_FAULT_OVUV)
+                DBG_PRINTLN(F("ovuv"));
+            if(maxFault == MAX31865_FAULT_REFINHIGH)
+                DBG_PRINTLN(F("refinhigh"));
+            if(maxFault == MAX31865_FAULT_REFINLOW)
+                DBG_PRINTLN(F("refinlow"));
+            if(maxFault == MAX31865_FAULT_RTDINLOW)
+                DBG_PRINTLN(F("rtdinlow"));
+
             DBG_PRINT(F("MAX31865 FAULT: "))
-            DBG_PRINTLN(max.readFault());
+            DBG_PRINTLN(maxFault);
         }
 
+        DBG_PRINT(F("RTD: "));
+        DBG_PRINTLN(rtd);
         DBG_PRINT(F("Temp: "));
         DBG_PRINTLN(temp);
 
@@ -267,6 +289,8 @@ void do_send(osjob_t *j)
         m.nc_4p0 = 0.0;
         m.typical_particle_size = 0.0;
         hum = 0.0;
+
+        saveToPayload(temp, payload, 0); // Save data to payload at [0] and [1]
 #else
         temp = htu.readTemperature();
         DBG_PRINT(F("Temp: "));

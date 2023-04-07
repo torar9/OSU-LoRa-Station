@@ -24,6 +24,8 @@
   #define UPLOAD_PORT 1
 #endif
 
+#define SPI_CS_PIN 10
+
 /**< SPS30 cleaning interval in days. */
 #define SPS30_CLEAN_INTERVAL_IN_DAYS 7
 
