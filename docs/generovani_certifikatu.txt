@@ -1,0 +1,7 @@
+openssl req -newkey rsa:4096 \
+            -x509 \
+            -sha256 \
+            -days 547 \
+            -nodes \
+            -out node-red.crt \
+            -keyout node-red.key

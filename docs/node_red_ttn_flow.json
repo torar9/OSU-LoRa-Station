@@ -1,0 +1,587 @@
+[
+    {
+        "id": "4497ebfd.5af1dc",
+        "type": "tab",
+        "label": "TTN",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "b5f3d60e.e49678",
+        "type": "mqtt in",
+        "z": "4497ebfd.5af1dc",
+        "name": "ttn-all-app-uplinks",
+        "topic": "v3/ou-stations@ttn/devices/+/up",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "948c1265.268f38",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 80,
+        "wires": [
+            [
+                "22d03df664fbcae3",
+                "f4025e1efd44d6cf"
+            ]
+        ]
+    },
+    {
+        "id": "973a77d4.527098",
+        "type": "json",
+        "z": "4497ebfd.5af1dc",
+        "name": "uplink-parser",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 230,
+        "y": 340,
+        "wires": [
+            [
+                "f4025e1efd44d6cf"
+            ]
+        ]
+    },
+    {
+        "id": "e7c3f74f.e239b8",
+        "type": "inject",
+        "z": "4497ebfd.5af1dc",
+        "name": "simulated",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"end_device_ids\":{\"device_id\":\"eui-70b3d57ed0048fd1\",\"application_ids\":{\"application_id\":\"torar-test-app\"},\"dev_eui\":\"70B3D57ED0048FD1\"},\"correlation_ids\":[\"as:up:01G0FPF24ZJR6XCDFQAAM3KNGY\",\"rpc:/ttn.lorawan.v3.AppAs/SimulateUplink:3fea1f1b-8ffc-4fcf-b4f7-ff4788dbec29\"],\"received_at\":\"2022-04-12T20:12:00.543835788Z\",\"uplink_message\":{\"f_port\":1,\"frm_payload\":\"WW/Nd8dWamYTbXNtHl1gbJxuHW86byxU\",\"decoded_payload\":{\"bytes\":[89,111,205,119,199,86,106,102,19,109,115,109,30,93,96,108,156,110,29,111,58,111,44,84],\"humidity\":48.7548828125,\"nc0p5\":3.997802734375,\"nc10p0\":22.5830078125,\"nc1p0\":13.671875,\"nc2p5\":20.654296875,\"nc4p0\":22.22900390625,\"pm10p0\":17.02880859375,\"pm1p0\":2.64739990234375,\"pm2p5\":10.02197265625,\"pm4p0\":15.85693359375,\"temperature\":22.96142578125,\"typical_value\":1.629638671875},\"rx_metadata\":[{\"gateway_ids\":{\"gateway_id\":\"test\"},\"rssi\":42,\"channel_rssi\":42,\"snr\":4.2}],\"settings\":{\"data_rate\":{\"lora\":{\"bandwidth\":125000,\"spreading_factor\":7}}},\"locations\":{\"user\":{\"latitude\":49.78841740807103,\"longitude\":18.22120606899262,\"source\":\"SOURCE_REGISTRY\"}}},\"simulated\":true}",
+        "payloadType": "str",
+        "x": 100,
+        "y": 420,
+        "wires": [
+            [
+                "973a77d4.527098"
+            ]
+        ]
+    },
+    {
+        "id": "620ab4a83e3c6a7b",
+        "type": "comment",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "info": "Payload data:\n596FCD77C7566A66136D736D1E5D606C9C6E1D6F3A6F2C54\n\nttn outout json:\n{\"end_device_ids\":{\"device_id\":\"eui-70b3d57ed0048fd1\",\"application_ids\":{\"application_id\":\"torar-test-app\"},\"dev_eui\":\"70B3D57ED0048FD1\"},\"correlation_ids\":[\"as:up:01G0FPF24ZJR6XCDFQAAM3KNGY\",\"rpc:/ttn.lorawan.v3.AppAs/SimulateUplink:3fea1f1b-8ffc-4fcf-b4f7-ff4788dbec29\"],\"received_at\":\"2022-04-12T20:12:00.543835788Z\",\"uplink_message\":{\"f_port\":1,\"frm_payload\":\"WW/Nd8dWamYTbXNtHl1gbJxuHW86byxU\",\"decoded_payload\":{\"bytes\":[89,111,205,119,199,86,106,102,19,109,115,109,30,93,96,108,156,110,29,111,58,111,44,84],\"humidity\":48.7548828125,\"nc0p5\":3.997802734375,\"nc10p0\":22.5830078125,\"nc1p0\":13.671875,\"nc2p5\":20.654296875,\"nc4p0\":22.22900390625,\"pm10p0\":17.02880859375,\"pm1p0\":2.64739990234375,\"pm2p5\":10.02197265625,\"pm4p0\":15.85693359375,\"temperature\":22.96142578125,\"typical_value\":1.629638671875},\"rx_metadata\":[{\"gateway_ids\":{\"gateway_id\":\"test\"},\"rssi\":42,\"channel_rssi\":42,\"snr\":4.2}],\"settings\":{\"data_rate\":{\"lora\":{\"bandwidth\":125000,\"spreading_factor\":7}}},\"locations\":{\"user\":{\"latitude\":49.78841740807103,\"longitude\":18.22120606899262,\"source\":\"SOURCE_REGISTRY\"}}},\"simulated\":true}\n\nmqtt topic:\nv3/torar-test-app@ttn/devices/eui-70b3d57ed0048fd1/up",
+        "x": 80,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "7fd5ef0a5cfa64af",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "cb695f54a1160ac1",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "insert-uplink-function",
+        "func": "var params = [msg.device_id, msg.temperature, msg.humidity, msg.pm1p0, msg.pm2p5, msg.pm4p0, msg.pm10p0, \nmsg.nc0p5, msg.nc1p0, msg.nc2p5, msg.nc4p0, msg.nc10p0, \nmsg.typical_value, msg.gateway_id, msg.rssi, msg.channel_rssi, msg.snr, msg.received_at, msg.raw_json];\n\nmsg = {params: params, topic: 'uplink'};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 180,
+        "wires": [
+            [
+                "9e0b939c37942151",
+                "4c92ed73b7146bb4"
+            ]
+        ]
+    },
+    {
+        "id": "27e384e46dc6fb43",
+        "type": "postgresql",
+        "z": "4497ebfd.5af1dc",
+        "name": "TTN-uplink-store",
+        "query": "insert into ttn.uplink(device_id, temperature, humidity, pm1p0, pm2p5, pm4p0, pm10p0, nc0p5, nc1p0, nc2p5, nc4p0, nc10p0, typical_value, gateway_id, rssi, channel_rssi, snr, received_at, raw_json) \nvalues($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);",
+        "postgreSQLConfig": "85ba96bec572a83c",
+        "split": false,
+        "rowsPerMsg": "2",
+        "outputs": 1,
+        "x": 990,
+        "y": 180,
+        "wires": [
+            [
+                "7fd5ef0a5cfa64af"
+            ]
+        ]
+    },
+    {
+        "id": "57e02670d381219a",
+        "type": "postgresql",
+        "z": "4497ebfd.5af1dc",
+        "name": "device-insert",
+        "query": "insert into ttn.device(application_id, device_id) \nvalues('ou-stations', $1)\non conflict do nothing;",
+        "postgreSQLConfig": "85ba96bec572a83c",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 670,
+        "y": 360,
+        "wires": [
+            [
+                "5af869551df830bd"
+            ]
+        ]
+    },
+    {
+        "id": "ff4fdb338d3a78c4",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "insert-device-function",
+        "func": "var params = [msg.device_id];\n\nmsg = {params: params, topic: 'device'};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 260,
+        "wires": [
+            [
+                "57e02670d381219a"
+            ]
+        ]
+    },
+    {
+        "id": "5af869551df830bd",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "delay-flush",
+        "func": "msg = {flush: 1};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 260,
+        "wires": [
+            [
+                "9e0b939c37942151",
+                "6c2ad29d14fbb7bd"
+            ]
+        ]
+    },
+    {
+        "id": "6c2ad29d14fbb7bd",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9e0b939c37942151",
+        "type": "delay",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "60",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 760,
+        "y": 180,
+        "wires": [
+            [
+                "27e384e46dc6fb43"
+            ]
+        ]
+    },
+    {
+        "id": "759085f292d94308",
+        "type": "catch",
+        "z": "4497ebfd.5af1dc",
+        "name": "device-insert-error",
+        "scope": [
+            "57e02670d381219a"
+        ],
+        "uncaught": false,
+        "x": 330,
+        "y": 40,
+        "wires": [
+            [
+                "6c10433789e18b96",
+                "c803558a21097d6b"
+            ]
+        ]
+    },
+    {
+        "id": "6c10433789e18b96",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "delay-reset",
+        "func": "msg = {reset: 1};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 80,
+        "wires": [
+            [
+                "9e0b939c37942151"
+            ]
+        ]
+    },
+    {
+        "id": "22d03df664fbcae3",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 310,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "d3a822f0928b706a",
+        "type": "catch",
+        "z": "4497ebfd.5af1dc",
+        "name": "data-extractor-error",
+        "scope": [
+            "d9eed30d.eeecb8"
+        ],
+        "uncaught": false,
+        "x": 330,
+        "y": 80,
+        "wires": [
+            [
+                "c803558a21097d6b"
+            ]
+        ]
+    },
+    {
+        "id": "c64451aa63f8d147",
+        "type": "inject",
+        "z": "4497ebfd.5af1dc",
+        "name": "port 1",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[0, 42, 52, 22]",
+        "payloadType": "str",
+        "x": 90,
+        "y": 540,
+        "wires": [
+            [
+                "0b2b57edab0aa6ea"
+            ]
+        ]
+    },
+    {
+        "id": "0b2b57edab0aa6ea",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "func": "return {\n  \"payload\": {\n    \"downlinks\": [{\n      \"f_port\": 1,\n      \"frm_payload\": msg.payload.toString(\"base64\"),\n      \"priority\": \"NORMAL\"\n    }]\n  }\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 540,
+        "wires": [
+            [
+                "f71813f778da480c"
+            ]
+        ]
+    },
+    {
+        "id": "8174a3ce96efd780",
+        "type": "inject",
+        "z": "4497ebfd.5af1dc",
+        "name": "port 2",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[0, 42, 52, 22]",
+        "payloadType": "str",
+        "x": 90,
+        "y": 620,
+        "wires": [
+            [
+                "1ce1e15925e4765c"
+            ]
+        ]
+    },
+    {
+        "id": "1ce1e15925e4765c",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "func": "return {\n  \"payload\": {\n    \"downlinks\": [{\n      \"f_port\": 2,\n      \"frm_payload\": msg.payload.toString(\"base64\"),\n      \"priority\": \"NORMAL\"\n    }]\n  }\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 620,
+        "wires": [
+            [
+                "363a53c182d127ea"
+            ]
+        ]
+    },
+    {
+        "id": "f71813f778da480c",
+        "type": "mqtt out",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "topic": "v3/ou-stations@ttn/devices/eui-70b3d57ed0048fd1/down/push",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "948c1265.268f38",
+        "x": 710,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "363a53c182d127ea",
+        "type": "mqtt out",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "topic": "v3/ou-stations@ttn/devices/eui-70b3d57ed0048fd1/down/push",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "948c1265.268f38",
+        "x": 710,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "f4025e1efd44d6cf",
+        "type": "function",
+        "z": "4497ebfd.5af1dc",
+        "name": "data-extractor",
+        "func": "if(msg.payload.simulated == null || msg.payload.simulated === false){\n\nvar temperature = {};\ntemperature.payload = msg.payload.uplink_message.decoded_payload.temperature;\ntemperature.topic = \"temperature\";\n\nvar humidity = {};\nhumidity.payload = msg.payload.uplink_message.decoded_payload.humidity;\nhumidity.topic = \"humidity\";\n\nvar nc0p5 = {};\nnc0p5.payload = msg.payload.uplink_message.decoded_payload.nc0p5;\nnc0p5.topic = \"nc0p5\";\n\nvar nc1p0 = {};\nnc1p0.payload = msg.payload.uplink_message.decoded_payload.nc1p0;\nnc1p0.topic = \"nc1p0\";\n\nvar nc2p5 = {};\nnc2p5.payload = msg.payload.uplink_message.decoded_payload.nc2p5;\nnc2p5.topic = \"nc2p5\";\n\nvar nc4p0 = {};\nnc4p0.payload = msg.payload.uplink_message.decoded_payload.nc4p0;\nnc4p0.topic = \"nc4p0\";\n\nvar nc10p0 = {};\nnc10p0.payload = msg.payload.uplink_message.decoded_payload.nc10p0;\nnc10p0.topic = \"nc10p0\";\n\nvar pm1p0 = {};\npm1p0.payload = msg.payload.uplink_message.decoded_payload.pm1p0;\npm1p0.topic = \"pm1p0\";\n\nvar pm2p5 = {};\npm2p5.payload = msg.payload.uplink_message.decoded_payload.pm2p5;\npm2p5.topic = \"pm2p5\";\n\nvar pm4p0 = {};\npm4p0.payload = msg.payload.uplink_message.decoded_payload.pm4p0;\npm4p0.topic = \"pm4p0\";\n\nvar pm10p0 = {};\npm10p0.payload = msg.payload.uplink_message.decoded_payload.pm10p0;\npm10p0.topic = \"pm10p0\";\n\nvar typical_value = {};\ntypical_value.payload = msg.payload.uplink_message.decoded_payload.typical_value;\ntypical_value.topic = \"typical_value\";\n\nvar device_id = {};\ndevice_id.payload = msg.payload.end_device_ids.device_id;\ndevice_id.topic = \"device_id\";\n\nvar gateway_id = {};\ngateway_id.payload = msg.payload.uplink_message.rx_metadata[0].gateway_ids.gateway_id;\ngateway_id.topic = \"gateway_id\";\n\nvar rssi = {};\nrssi.payload = msg.payload.uplink_message.rx_metadata[0].rssi;\nrssi.topic = \"rssi\";\n\nvar channel_rssi = {};\nchannel_rssi.payload = msg.payload.uplink_message.rx_metadata[0].channel_rssi;\nchannel_rssi.topic = \"channel_rssi\";\n\nvar snr = {};\nsnr.payload = msg.payload.uplink_message.rx_metadata[0].snr;\nsnr.topic = \"snr\";\n\nvar received_at = {};\nreceived_at.payload = msg.payload.received_at;\nreceived_at.topic = \"received_at\";\n\nvar raw_json = {};\nraw_json.payload = msg.payload;\nraw_json.topic = \"raw_json\";\n\nmsg = {\n    temperature: temperature.payload,\n    humidity: humidity.payload,\n    nc0p5: nc0p5.payload,\n    nc1p0: nc1p0.payload,\n    nc2p5: nc2p5.payload,\n    nc4p0: nc4p0.payload,\n    nc10p0: nc10p0.payload,\n    pm1p0: pm1p0.payload,\n    pm2p5: pm2p5.payload,\n    pm4p0: pm4p0.payload,\n    pm10p0: pm10p0.payload,\n    typical_value: typical_value.payload,\n    device_id: device_id.payload,\n    gateway_id: gateway_id.payload,\n    rssi: rssi.payload,\n    channel_rssi: channel_rssi.payload,\n    snr: snr.payload,\n    received_at: received_at.payload,\n    raw_json: raw_json.payload\n};\n\nreturn msg;}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 220,
+        "wires": [
+            [
+                "cb695f54a1160ac1",
+                "ff4fdb338d3a78c4"
+            ]
+        ]
+    },
+    {
+        "id": "c803558a21097d6b",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "4c92ed73b7146bb4",
+        "type": "debug",
+        "z": "4497ebfd.5af1dc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "b865cb7ccd9066b9",
+        "type": "inject",
+        "z": "4497ebfd.5af1dc",
+        "name": "unsimulated null",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"end_device_ids\":{\"device_id\":\"eui-70b3d57ed0048fd1\",\"application_ids\":{\"application_id\":\"torar-test-app\"},\"dev_eui\":\"70B3D57ED0048FD1\"},\"correlation_ids\":[\"as:up:01G0FPF24ZJR6XCDFQAAM3KNGY\",\"rpc:/ttn.lorawan.v3.AppAs/SimulateUplink:3fea1f1b-8ffc-4fcf-b4f7-ff4788dbec29\"],\"received_at\":\"2022-04-12T20:12:00.543835788Z\",\"uplink_message\":{\"f_port\":1,\"frm_payload\":\"WW/Nd8dWamYTbXNtHl1gbJxuHW86byxU\",\"decoded_payload\":{\"bytes\":[89,111,205,119,199,86,106,102,19,109,115,109,30,93,96,108,156,110,29,111,58,111,44,84],\"humidity\":48.7548828125,\"nc0p5\":3.997802734375,\"nc10p0\":22.5830078125,\"nc1p0\":13.671875,\"nc2p5\":20.654296875,\"nc4p0\":22.22900390625,\"pm10p0\":17.02880859375,\"pm1p0\":2.64739990234375,\"pm2p5\":10.02197265625,\"pm4p0\":15.85693359375,\"temperature\":22.96142578125,\"typical_value\":1.629638671875},\"rx_metadata\":[{\"gateway_ids\":{\"gateway_id\":\"test\"},\"rssi\":42,\"channel_rssi\":42,\"snr\":4.2}],\"settings\":{\"data_rate\":{\"lora\":{\"bandwidth\":125000,\"spreading_factor\":7}}},\"locations\":{\"user\":{\"latitude\":49.78841740807103,\"longitude\":18.22120606899262,\"source\":\"SOURCE_REGISTRY\"}}}}",
+        "payloadType": "str",
+        "x": 120,
+        "y": 460,
+        "wires": [
+            [
+                "973a77d4.527098"
+            ]
+        ]
+    },
+    {
+        "id": "b2bfa33bb191a1e1",
+        "type": "inject",
+        "z": "4497ebfd.5af1dc",
+        "name": "unsimulated false",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"end_device_ids\":{\"device_id\":\"eui-70b3d57ed0048fd1\",\"application_ids\":{\"application_id\":\"torar-test-app\"},\"dev_eui\":\"70B3D57ED0048FD1\"},\"correlation_ids\":[\"as:up:01G0FPF24ZJR6XCDFQAAM3KNGY\",\"rpc:/ttn.lorawan.v3.AppAs/SimulateUplink:3fea1f1b-8ffc-4fcf-b4f7-ff4788dbec29\"],\"received_at\":\"2022-04-12T20:12:00.543835788Z\",\"uplink_message\":{\"f_port\":1,\"frm_payload\":\"WW/Nd8dWamYTbXNtHl1gbJxuHW86byxU\",\"decoded_payload\":{\"bytes\":[89,111,205,119,199,86,106,102,19,109,115,109,30,93,96,108,156,110,29,111,58,111,44,84],\"humidity\":48.7548828125,\"nc0p5\":3.997802734375,\"nc10p0\":22.5830078125,\"nc1p0\":13.671875,\"nc2p5\":20.654296875,\"nc4p0\":22.22900390625,\"pm10p0\":17.02880859375,\"pm1p0\":2.64739990234375,\"pm2p5\":10.02197265625,\"pm4p0\":15.85693359375,\"temperature\":22.96142578125,\"typical_value\":1.629638671875},\"rx_metadata\":[{\"gateway_ids\":{\"gateway_id\":\"test\"},\"rssi\":42,\"channel_rssi\":42,\"snr\":4.2}],\"settings\":{\"data_rate\":{\"lora\":{\"bandwidth\":125000,\"spreading_factor\":7}}},\"locations\":{\"user\":{\"latitude\":49.78841740807103,\"longitude\":18.22120606899262,\"source\":\"SOURCE_REGISTRY\"}}},\"simulated\":false}",
+        "payloadType": "str",
+        "x": 120,
+        "y": 500,
+        "wires": [
+            [
+                "973a77d4.527098"
+            ]
+        ]
+    },
+    {
+        "id": "948c1265.268f38",
+        "type": "mqtt-broker",
+        "name": "TTN-ou-stations",
+        "broker": "eu1.cloud.thethings.network",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "85ba96bec572a83c",
+        "type": "postgreSQLConfig",
+        "name": "localhost",
+        "host": "127.0.0.1",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "ou_stations",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "stationUser",
+        "userFieldType": "str",
+        "password": "Bublinka999+",
+        "passwordFieldType": "str"
+    }
+]
